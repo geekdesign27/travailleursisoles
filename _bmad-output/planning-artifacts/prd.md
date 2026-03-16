@@ -8,6 +8,7 @@ stepsCompleted:
   - step-04-journeys
   - step-05-domain
   - step-06-innovation
+  - step-07-project-type
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -301,3 +302,82 @@ Rompre avec l'analyse par poste de travail pour analyser par combinaison tâche 
 | La surcouche opérationnelle est jugée non pertinente | Les dimensions [CONFIG] sont désactivables — le cœur SUVA reste fonctionnel seul |
 | La vulgarisation produit des valeurs incorrectes | Mode expert permettant la saisie directe des codes techniques (bypass des questionnaires intermédiaires) |
 | L'unité TÂCHE × PÉRIODE complexifie trop | Option de regroupement par poste dans le dashboard pour simplifier la vue consolidée |
+
+## Web App Specific Requirements
+
+### Project-Type Overview
+
+Application web monopage (SPA) déployée en statique, sans backend propriétaire. L'architecture client-side-only est un choix délibéré : zéro dépendance serveur, données chez le client, déploiement sur CDN. Le stack React 18 + TypeScript + Vite + TailwindCSS + DaisyUI est défini dans le cahier des charges.
+
+### Technical Architecture Considerations
+
+**SPA avec routing client-side :**
+- React Router pour la navigation entre modules (M1-M7)
+- État global via React Context + useReducer (pas de Redux — complexité non justifiée)
+- Wizard multi-step avec état persisté entre les étapes
+
+**Support navigateurs :**
+
+| Navigateur | Version minimum | Priorité |
+|-----------|----------------|----------|
+| Chrome / Edge | 2 dernières versions | Principale — usage desktop et tablette |
+| Safari | 2 dernières versions | Secondaire — iPad terrain |
+| Firefox | 2 dernières versions | Secondaire |
+| Mobile Safari / Chrome Android | 2 dernières versions | Responsive tablette uniquement (pas smartphone-first) |
+
+**SEO :**
+- Non prioritaire — l'outil est une application métier, pas un site de contenu
+- Page d'accueil statique avec description du produit pour le référencement de base
+- Les analyses et rapports ne sont pas indexables (données privées)
+
+**Temps réel :**
+- Pas de temps réel serveur (pas de WebSocket/SSE)
+- Recalcul réactif côté client : la sidebar résumé se met à jour instantanément à chaque modification dans le wizard
+- La matrice et les scores se recalculent en temps réel lors de la navigation entre étapes
+
+### Responsive Design
+
+| Breakpoint | Cible | Comportement |
+|-----------|-------|-------------|
+| ≥ 1024px | Desktop | Layout complet : wizard + sidebar résumé côte à côte |
+| 768px – 1023px | Tablette paysage | Sidebar sous le formulaire ou en drawer |
+| < 768px | Tablette portrait / Mobile | Wizard pleine largeur, sidebar accessible via toggle. Fonctionnel mais optimisé pour tablette, pas smartphone |
+
+Priorité : **tablette** pour les visites terrain (iPad, Android tablet). Le formulaire doit être utilisable sans zoom ni scroll horizontal.
+
+### Performance Targets
+
+| Métrique | Cible | Justification |
+|---------|-------|---------------|
+| First Contentful Paint | < 1.5s | Déploiement statique CDN — pas de SSR nécessaire |
+| Time to Interactive | < 2s | Bundle léger, pas de backend à attendre |
+| Transition entre étapes wizard | < 100ms | Tout est côté client, recalcul instantané |
+| Génération PDF | < 5s | jsPDF + html2canvas côté client |
+| Bundle size (gzipped) | < 200KB | React + TailwindCSS + DaisyUI + jsPDF |
+
+### Accessibility
+
+| Niveau | Cible | Détails |
+|--------|-------|---------|
+| **WCAG** | 2.1 AA | Minimum requis pour une application professionnelle |
+| Navigation clavier | Complète | Toutes les étapes du wizard navigables au clavier |
+| Contraste couleurs | Ratio ≥ 4.5:1 | Attention particulière aux badges de zone (couleurs Z1-Z4 sur fond blanc) |
+| Lecteur d'écran | Labels ARIA | Formulaires, matrice des risques, badges de zone |
+| Focus visible | Outline visible | Navigation claire dans le wizard multi-step |
+
+### Implementation Considerations
+
+**Génération d'exports côté client :**
+- PDF via jsPDF + html2canvas : le rapport bi-couche est rendu en HTML puis capturé. Alternative : génération directe jsPDF pour un contrôle pixel-perfect
+- CSV via Blob API avec BOM UTF-8 pour compatibilité Excel Windows (caractères accentués français)
+
+**Google Sheets comme "backend" :**
+- OAuth2 avec scope `spreadsheets` limité
+- Gestion du quota API Google (100 requêtes/100s par utilisateur)
+- Fallback gracieux si le Sheet n'est pas connecté (localStorage seul)
+- Création automatique de la structure d'onglets au premier accès
+
+**Offline-first pattern :**
+- localStorage comme couche primaire de persistance
+- Synchronisation Google Sheets quand disponible
+- Aucune fonctionnalité bloquée si hors-ligne (sauf sync)
