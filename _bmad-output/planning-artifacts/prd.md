@@ -12,6 +12,7 @@ stepsCompleted:
   - step-08-scoping
   - step-09-functional
   - step-10-nonfunctional
+  - step-11-polish
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -44,7 +45,7 @@ L'application est sans backend propriétaire : les données sont stockées chez 
 
 Utilisateurs cibles : les spécialistes STPS / consultants SST qui conduisent les analyses (utilisateurs primaires), les cadres et collaborateurs terrain qui reçoivent et appliquent les conclusions (destinataires du rapport).
 
-### What Makes This Special
+### Ce qui le rend spécial
 
 - **Premier outil digital conforme SUVA 44094.F** — aucun équivalent n'existe pour les PME/PMI suisses. Les alternatives actuelles (papier SUVA, Excel non structuré, logiciels SST génériques) ne couvrent pas la logique à 4 niveaux avec gates séquentiels.
 - **Surcouche opérationnelle au-delà de la méthode SUVA** — charge cognitive (C1-C3), matrice de fiabilité des outils d'alerte, décision différenciée par période (jour/nuit/weekend). Des dimensions que la norme seule ne couvre pas.
@@ -97,46 +98,6 @@ Utilisateurs cibles : les spécialistes STPS / consultants SST qui conduisent le
 - **Qualité documentaire** : 100% des analyses finalisées passent toutes les validations croisées (cohérence entre niveaux, t_max calculé, outil d'alerte validé)
 - **Couverture méthodologique** : les 4 niveaux SUVA + surcouche opérationnelle sont opérationnels avec tous les algorithmes de la spécification logique
 - **Adoption mesurable** : nombre d'analyses créées et finalisées par mois par utilisateur
-
-## Product Scope
-
-### MVP - Minimum Viable Product
-
-> **Note importante :** Le product brief définit explicitement qu'il n'y a pas de découpage MVP progressif. La V1 livre l'intégralité des fonctionnalités car la spécification logique est suffisamment détaillée et le périmètre bien cerné. Cependant, pour structurer le développement, le scope est organisé en phases de livraison.
-
-**Phase 1 — Cœur fonctionnel (MVP technique) :**
-- Wizard 4 niveaux complet (gate réglementaire → matrice SUVA → faisabilité sauvetage → validation outil d'alerte)
-- Questionnaires intermédiaires en langage naturel
-- Moteur de calcul complet (matrice SUVA, t_max, scores composites, reclassement automatique)
-- Rapport bi-couche (langage naturel + détail technique)
-- Distinction visuelle [SUVA_CONST] / [CONFIG]
-- Unité d'analyse TÂCHE × PÉRIODE
-- Persistance localStorage + export PDF/CSV
-- Déploiement statique
-
-**Phase 2 — Intégration données :**
-- Connexion Google Sheets (OAuth2, synchronisation, multi-tenant)
-- Configuration entreprise de base
-- Sidebar résumé temps réel
-
-### Growth Features (Post-MVP)
-
-- Dashboard consolidé (vue d'ensemble multi-analyses, statuts, alertes de révision)
-- Taxonomies paramétrables complètes
-- Logo entreprise dans PDF
-- Écran d'introduction / onboarding 3 étapes
-- Mode comparaison entre analyses
-- Import CSV
-
-### Vision (Future)
-
-- Multi-langue (allemand, italien) pour couvrir toute la Suisse
-- Bibliothèque de cas types par secteur (industrie, BTP, santé, agriculture)
-- Mode collaboratif multi-spécialistes
-- API / connecteurs vers logiciels SST du marché suisse
-- Intelligence augmentée (suggestions basées sur l'historique)
-- Certification / labellisation officielle SUVA ou organismes STPS
-- PWA mode hors-ligne pour les visites terrain sans réseau
 
 ## User Journeys
 
@@ -348,27 +309,9 @@ Application web monopage (SPA) déployée en statique, sans backend propriétair
 
 Priorité : **tablette** pour les visites terrain (iPad, Android tablet). Le formulaire doit être utilisable sans zoom ni scroll horizontal.
 
-### Performance Targets
-
-| Métrique | Cible | Justification |
-|---------|-------|---------------|
-| First Contentful Paint | < 1.5s | Déploiement statique CDN — pas de SSR nécessaire |
-| Time to Interactive | < 2s | Bundle léger, pas de backend à attendre |
-| Transition entre étapes wizard | < 100ms | Tout est côté client, recalcul instantané |
-| Génération PDF | < 5s | jsPDF + html2canvas côté client |
-| Bundle size (gzipped) | < 200KB | React + TailwindCSS + DaisyUI + jsPDF |
-
-### Accessibility
-
-| Niveau | Cible | Détails |
-|--------|-------|---------|
-| **WCAG** | 2.1 AA | Minimum requis pour une application professionnelle |
-| Navigation clavier | Complète | Toutes les étapes du wizard navigables au clavier |
-| Contraste couleurs | Ratio ≥ 4.5:1 | Attention particulière aux badges de zone (couleurs Z1-Z4 sur fond blanc) |
-| Lecteur d'écran | Labels ARIA | Formulaires, matrice des risques, badges de zone |
-| Focus visible | Outline visible | Navigation claire dans le wizard multi-step |
-
 ### Implementation Considerations
+
+> **Note :** Les cibles de performance et d'accessibilité sont définies dans la section [Non-Functional Requirements](#non-functional-requirements) (NFR1-NFR7 pour la performance, NFR13-NFR17 pour l'accessibilité). Bundle size cible : < 200KB gzipped.
 
 **Génération d'exports côté client :**
 - PDF via jsPDF + html2canvas : le rapport bi-couche est rendu en HTML puis capturé. Alternative : génération directe jsPDF pour un contrôle pixel-perfect
