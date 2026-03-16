@@ -52,6 +52,48 @@ export const Level1ResultSchema = z.object({
 
 export type Level1Result = z.infer<typeof Level1ResultSchema>;
 
+export const DANGER_CATEGORIES = [
+  "mecanique",
+  "electrique",
+  "thermique",
+  "chimique",
+  "biologique",
+  "chute",
+  "noyade",
+  "asphyxie",
+  "psychosocial",
+  "autre",
+] as const;
+
+export const DangerCategory = z.enum(DANGER_CATEGORIES);
+export type DangerCategoryType = z.infer<typeof DangerCategory>;
+
+export const AptitudesSchema = z.object({
+  psychique: z.boolean(),
+  physique: z.boolean(),
+  intellectuelle: z.boolean(),
+});
+
+export const Level2ResultSchema = z.object({
+  gravity: z.enum(["I", "II", "III", "IV", "V"]),
+  probability: z.enum(["A", "B", "C", "D", "E"]),
+  zone: z.union([
+    z.literal(1),
+    z.literal(2),
+    z.literal("3a"),
+    z.literal("3b"),
+    z.literal(4),
+  ]),
+  aptitudes: AptitudesSchema,
+  dangerDescription: z
+    .string()
+    .min(150, "Minimum 150 caractères")
+    .max(300, "Maximum 300 caractères"),
+  dangerCategory: DangerCategory,
+});
+
+export type Level2Result = z.infer<typeof Level2ResultSchema>;
+
 export const AnalysisSchema = z.object({
   id: z.string().uuid(),
   entreprise: z.string().min(1).max(100),
@@ -66,6 +108,7 @@ export const AnalysisSchema = z.object({
   currentStep: z.number().default(1),
   currentLevel: z.number().min(0).max(4).default(0),
   level1Result: Level1ResultSchema.optional(),
+  level2Result: Level2ResultSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
