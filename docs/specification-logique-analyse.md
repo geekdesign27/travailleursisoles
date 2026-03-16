@@ -79,11 +79,34 @@ Ces données conditionnent l'ensemble de l'analyse. Elles doivent être renseign
 
 > Rôle de la fréquence : elle n'entre pas dans le calcul de la matrice. Elle influence la validation de l'outil d'alerte (Niveau 4) et documente l'exposition cumulée dans le rapport.
 
-**Charge cognitive de la tâche** :
+**Charge cognitive de la tâche** — Estimation guidée par questionnaire :
 
-- **C1 — Faible** : ronde de surveillance, tâche administrative terrain, monitoring. Personne mobile, disponible mentalement pour déclencher une alerte.
-- **C2 — Moyenne** : opération technique standard, maintenance préventive planifiée, procédure connue et maîtrisée.
-- **C3 — Élevée** : dépannage, intervention d'urgence, manipulation complexe ou inhabituelle. Attention mobilisée sur la tâche — risque d'incapacitation soudaine sans avoir pu déclencher l'alerte.
+L'utilisateur ne sélectionne **pas** directement C1/C2/C3. Le code est déterminé automatiquement à partir de 2 questions en langage naturel.
+
+**Référence des codes charge cognitive :**
+
+| Code | Libellé | Description |
+|------|---------|-------------|
+| C1 | Faible | Ronde de surveillance, tâche administrative terrain, monitoring. Personne mobile, disponible mentalement pour déclencher une alerte. |
+| C2 | Moyenne | Opération technique standard, maintenance préventive planifiée, procédure connue et maîtrisée. |
+| C3 | Élevée | Dépannage, intervention d'urgence, manipulation complexe ou inhabituelle. Attention mobilisée sur la tâche — risque d'incapacitation soudaine sans avoir pu déclencher l'alerte. |
+
+**Q_COG_1** : "Si cette personne était soudainement blessée ou inconsciente durant cette tâche, serait-elle en mesure de déclencher elle-même une alarme ?"
+
+| Réponse | Résultat |
+|---------|----------|
+| Très probablement oui — tâche simple, personne mobile et attentive | → C1 |
+| Probablement oui — tâche technique standard, procédure connue | → C2 (passer à Q_COG_2) |
+| Probablement non — attention fortement mobilisée sur la tâche | → C3 |
+
+**Q_COG_2** (affichée uniquement si réponse C2 à Q_COG_1) : "Cette tâche peut-elle nécessiter un dépannage, une intervention d'urgence ou une manipulation complexe imprévue ?"
+
+| Réponse | Résultat |
+|---------|----------|
+| Non, tâche toujours routinière | → Confirme C2 |
+| Oui, c'est possible | → Reclasser en C3 |
+
+Afficher le code résultant (C1/C2/C3) avec son libellé en **lecture seule**. L'utilisateur ne sélectionne jamais directement le code.
 
 > Rôle de la charge cognitive : elle entre dans la validation de l'outil d'alerte (Niveau 4). C3 impose un système à déclenchement automatique.
 
@@ -172,9 +195,11 @@ Sélectionner le niveau de gravité probable pour le danger identifié, en l'abs
 | IV | FAIBLE | Blessure avec arrêt de travail sans atteinte irréversible | Fracture simple, entorse grave, plaie profonde, commotion cérébrale légère |
 | V | TRÈS FAIBLE | Blessure légère sans arrêt de travail | Contusion, égratignure, entorse légère, foulure de poignet |
 
-### 4.3 Probabilité d'accident [SUVA_CONST]
+### 4.3 Probabilité d'accident [SUVA_CONST] — Estimation guidée par questionnaire
 
-Estimer la probabilité d'occurrence du dommage décrit. Base de référence : imaginer 1000 travailleurs effectuant cette même tâche dans les mêmes conditions sur une période de 20 ans.
+L'utilisateur ne sélectionne **pas** directement le code A-E. La probabilité est calculée automatiquement à partir de 3 questions fermées en langage naturel, puis affichée avec justification. L'utilisateur peut corriger manuellement s'il a une bonne raison (case optionnelle avec champ texte de justification).
+
+#### Référence des codes probabilité [SUVA_CONST]
 
 | Code | Libellé | Description |
 |------|---------|-------------|
@@ -184,12 +209,55 @@ Estimer la probabilité d'occurrence du dommage décrit. Base de référence : i
 | D | IMPROBABLE | Entre 1 fois en 20 ans et 1 fois en 5 ans |
 | E | QUASI IMPOSSIBLE | Entre 1 fois en 100 ans et 1 fois en 20 ans |
 
-**Aide contextuelle** à afficher selon la fréquence de la tâche saisie à l'étape d'identification :
+#### Questions d'estimation
+
+**Q_PROB_1** : "L'équipement ou l'environnement est-il conforme à l'état de la technique ?"
+
+| Réponse | Valeur |
+|---------|--------|
+| Oui, conforme et contrôlé | Favorable |
+| Partiellement | Neutre |
+| Non ou inconnu | Défavorable |
+
+**Q_PROB_2** : "Des accidents ou incidents similaires pour cette tâche se sont-ils déjà produits dans votre entreprise ou votre secteur ?"
+
+| Réponse | Valeur |
+|---------|--------|
+| Jamais entendu parler | Favorable |
+| Oui, rarement | Neutre |
+| Oui, plusieurs fois | Défavorable |
+
+**Q_PROB_3** : "Des mesures de protection techniques sont-elles en place (garde-corps, limiteur, système anti-redémarrage, détection, etc.) ?"
+
+| Réponse | Valeur |
+|---------|--------|
+| Oui, complètes | Favorable |
+| Partielles | Neutre |
+| Non | Défavorable |
+
+#### Logique de calcul de la probabilité
+
+```
+3× réponse favorable (Oui/Jamais/Oui)         → D ou E selon gravité
+2× favorable, 1× neutre                        → D
+1× favorable, 2× neutre ou 1× défavorable      → C
+2× défavorable ou 1× "Oui plusieurs fois"      → B
+3× défavorable                                  → A
+
+Règle de sécurité :
+  Si gravité I ou II ET au moins 1× défavorable → minimum B
+```
+
+Afficher le résultat en lecture seule : code + libellé + justification basée sur les réponses.
+
+**Correction manuelle optionnelle** : case à cocher "Je souhaite corriger cette estimation" → affiche un sélecteur A-E + champ texte obligatoire "Justification de la correction". La correction est documentée dans le rapport.
+
+#### Aide contextuelle (affichée après le calcul)
 
 - Si F3 (quotidienne) et gravité II ou I : "Avec cette fréquence d'exposition, une probabilité D ou E est difficile à justifier sans mesures de protection techniques solides. Vérifier l'état de la technique."
 - Si F0 (rare) et gravité IV ou V : "Une probabilité D ou E est cohérente avec une tâche rare et un risque faible."
 
-> Note : la fréquence de la TÂCHE aide à estimer la probabilité d'ACCIDENT, mais ne la détermine pas mécaniquement. Un travail fréquent avec mesures de protection solides peut avoir une probabilité D. L'utilisateur décide et justifie.
+> Note : la fréquence de la TÂCHE aide à estimer la probabilité d'ACCIDENT, mais ne la détermine pas mécaniquement. Le questionnaire guide l'estimation mais l'utilisateur peut corriger et justifier.
 
 ### 4.4 Calcul de la zone [SUVA_CONST]
 
@@ -234,14 +302,55 @@ zone_base = MATRIX[probabilite][gravite]
 
 Vérifier que les délais réels de sauvetage sont compatibles avec la zone déterminée à la matrice. Ce niveau transforme une zone abstraite en décision opérationnelle par période de travail.
 
-### 5.1 Données de délais à collecter
+### 5.1 Données de délais à collecter — Saisie par fourchettes contextuelles
 
-| Champ | Description |
-|-------|-------------|
-| delai_secouristes_jour_min | Temps en minutes entre le déclenchement de l'alerte et l'arrivée des premiers secouristes internes formés, pendant les heures d'exploitation normales. Si aucun secouriste interne : saisir le délai d'arrivée des premiers secours publics. |
-| delai_secouristes_nuit_min | Même mesure, pour la nuit et le weekend (équipe réduite ou absente). Champ affiché uniquement si les périodes NUIT ou WEEKEND sont actives. |
-| delai_ambulance_min | Temps en minutes entre l'appel au 144 / 1414 et l'arrivée de l'ambulance ou du SMUR sur le lieu précis du travail. Intègre les accès difficiles, l'attente, les barrières de sécurité à franchir. |
-| delai_sauvetage_technique_min | Temps supplémentaire pour atteindre la personne si elle se trouve dans un espace difficile d'accès (toit, silo, sous-sol, zone confinée). Si accès direct : saisir 0. |
+L'utilisateur sélectionne des fourchettes en langage naturel au lieu de saisir des minutes directement. La valeur médiane de la fourchette est utilisée dans les calculs. Si le résultat du t_max est borderline (Zone 3 avec intervalle entre 30 et 60 min), demander alors la **valeur précise en minutes** pour affiner le calcul.
+
+#### delai_secouristes (jour et nuit séparément)
+
+Champ nuit affiché uniquement si les périodes NUIT ou WEEKEND sont actives.
+
+| Fourchette | Libellé contextuel | Valeur calcul |
+|------------|-------------------|---------------|
+| < 5 min | Collègue ou secouriste dans le même bâtiment | 4 min |
+| 5-15 min | Secouriste sur site, temps de déplacement interne | 10 min |
+| 15-30 min | Secouriste doit venir de l'extérieur du site | 22 min |
+| > 30 min | Aucun secouriste disponible rapidement | 40 min |
+
+#### delai_ambulance (144 / 1414 / REGA)
+
+| Fourchette | Libellé contextuel | Valeur calcul |
+|------------|-------------------|---------------|
+| < 10 min | Site urbain, caserne à proximité immédiate | 8 min |
+| 10-20 min | Agglomération, accès normal | 15 min |
+| 20-35 min | Zone périurbaine ou accès difficile | 27 min |
+| 35-60 min | Zone rurale ou montagne | 47 min |
+| > 60 min | Site très isolé, REGA souvent nécessaire | 75 min |
+
+#### delai_sauvetage_technique
+
+| Fourchette | Libellé contextuel | Valeur calcul |
+|------------|-------------------|---------------|
+| Accès direct | Aucun obstacle | 0 min |
+| Accès avec équipement simple | Échelle, clé, porte | 5 min |
+| Accès difficile | Hauteur, espace confiné, sous-sol profond | 15 min |
+| Accès très difficile | Treuil, matériel spécialisé requis | 30 min |
+
+#### Avertissement de cohérence
+
+Si la combinaison semble incohérente (ex : delai_ambulance < 10 min ET site décrit comme industriel isolé), afficher : "Vérifiez ce délai directement auprès du 144 — indiquez votre adresse exacte."
+
+#### Aide à la mesure (affichée sur chaque champ délai)
+
+"Vous ne connaissez pas ce délai ? Appelez le 144 et demandez-leur d'estimer leur temps d'intervention pour votre adresse précise. Notez leur réponse."
+
+#### Bouton "Je ne sais pas"
+
+Si l'utilisateur bloque sur un champ délai, proposer un bouton **"Je ne sais pas"** qui saisit la valeur la plus défavorable de la fourchette et affiche : "Valeur prudente utilisée — à vérifier et corriger." Cela évite l'abandon du formulaire et documente l'incertitude dans le rapport.
+
+#### Affinement si borderline
+
+Si après calcul avec les valeurs médianes, le t_max résultant place l'analyse en Zone 3 avec un intervalle de surveillance entre 30 et 60 minutes, afficher : "Le résultat est proche de la limite. Pour un calcul précis, veuillez indiquer les délais exacts en minutes." → Afficher des champs numériques pour saisie précise.
 
 ### 5.2 Gate G4 — Survie immédiate (Zone 1 dérivée)
 
@@ -482,40 +591,46 @@ Décision globale :
   Si mix GO / NO-GO selon périodes : afficher décision différenciée par période
 ```
 
-### 7.2 Structure de la décision finale
+### 7.2 Structure de la décision finale — Affichage en deux couches
+
+Le rapport ne doit **pas** afficher les codes techniques bruts en premier niveau (Zone 3b, t_max, VALIDE_AVEC_PROCÉDURE). L'affichage est structuré en deux couches pour servir à la fois les non-techniciens et les spécialistes.
+
+#### COUCHE 1 — Visible par défaut (langage naturel)
+
+Destinée aux cadres, management et collaborateurs. Pas de codes techniques.
 
 ```
-ANALYSE N° [id]
-TÂCHE : [titre_activite]
-DATE : [date_analyse]
+ANALYSE : [titre_tache]
+[entreprise] — [departement] / [service]
+Date : [date_analyse]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MATRICE DES RISQUES
-  Danger identifié   : [danger_principal]
-  Gravité            : [code] — [libellé] — [description]
-  Probabilité        : [code] — [libellé]
-  Zone SUVA de base  : [zone]
+DÉCISION
+
+  Pour chaque période active :
+    [Période] :
+      ✅ AUTORISÉ SOUS CONDITIONS
+      ou
+      ❌ INTERDIT — [motif en langage naturel]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RÉSULTAT PAR PÉRIODE
+CE QUE VOUS DEVEZ METTRE EN PLACE
 
-  [Période] : [GO ✅ / NO-GO ❌] — Zone [zone_finale]
-    Si GO :
-      Type de surveillance : [libellé zone]
-      Intervalle max.      : [intervalle] minutes (calculé)
-      Outil requis         : [outil_valide] [avec procédure si applicable]
-      Conditions           : [liste]
-    Si NO-GO :
-      Motif                : [motif_nogo]
-      Mesure obligatoire   : [mesure selon zone]
+  [Liste numérotée d'actions concrètes, en langage naturel]
+  Exemples :
+    1. Équiper le travailleur d'un dispositif PTI avec détection automatique de chute
+    2. S'assurer que la centrale d'alarme est joignable 24h/24
+    3. Vérifier le fonctionnement du dispositif avant chaque intervention
+    4. Documenter la formation du travailleur à l'utilisation du dispositif
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CONDITIONS OBLIGATOIRES
-  [Liste numérotée des conditions à respecter]
+CE QUI AMÉLIORERAIT LA SITUATION (non obligatoire)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PERSPECTIVES ET AMÉLIORATIONS
-  [Recommandations non obligatoires]
+  [Recommandations concrètes]
+  Exemples :
+    - Acquérir un PTI automatique pour remplacer le DATI manuel
+    - Réorganiser le planning pour avoir un collègue à portée de voix de nuit
+    - Installer une couverture WIFI dans la zone d'intervention
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CONCEPT D'URGENCE
@@ -525,16 +640,6 @@ CONCEPT D'URGENCE
   Accès des secours        : [saisie libre]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DÉLAIS DE SAUVETAGE
-  Secouristes internes de jour   : [X] min
-  Secouristes internes de nuit   : [X] min
-  Secours publics (144/1414)     : [X] min
-  Accès technique au lieu        : [X] min
-
-CALCUL t_max PAR PÉRIODE :
-  [Formule avec valeurs pour chaque période]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FORMATION
   Documentée       : [OUI / NON]
   Date             : [date]
@@ -542,12 +647,105 @@ FORMATION
   Date de révision : [date]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Référence méthode   : SUVA 44094.F — Édition mai 2025
-Base légale         : OPA RS 832.30 art. 8 al. 1
-Analysé par         : [responsable]
-Date                : [date]
-Statut              : [BROUILLON / COMPLET / VALIDÉ]
+Référence méthode : SUVA 44094.F — Édition mai 2025
+Analysé par       : [responsable]
+Statut            : [BROUILLON / COMPLET / VALIDÉ]
 ```
+
+#### COUCHE 2 — Accessible via bouton "Voir le détail technique"
+
+Destinée aux consultants SST et au dossier de conformité. Contient tous les codes, valeurs numériques et références légales.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAIL TECHNIQUE — MATRICE DES RISQUES
+  Danger identifié   : [danger_principal]
+  Gravité            : [code] — [libellé] — [description]
+  Probabilité        : [code] — [libellé]
+  Estimation prob.   : [réponses Q_PROB_1/2/3] → [code calculé]
+                       [correction manuelle si applicable + justification]
+  Zone SUVA de base  : [zone]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAIL TECHNIQUE — RÉSULTAT PAR PÉRIODE
+
+  [Période] : [GO ✅ / NO-GO ❌] — Zone [zone_finale]
+    Zone de base         : [zone_base]
+    Zone après Niveau 3  : [zone_apres_niv3]
+    Zone finale          : [zone_finale]
+    t_max calculé        : [valeur] minutes
+    Intervalle surv.     : [valeur] minutes
+    Outil retenu         : [code_outil] — [verdict]
+    Gate G4 (survie)     : [PASS / FAIL + motif]
+    Gate G5 (faisabilité): [PASS / FAIL + motif]
+    Gate G6 (distance)   : [PASS / FAIL + motif]
+    Gate G7 (outil)      : [PASS / FAIL + motif]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAIL TECHNIQUE — DÉLAIS DE SAUVETAGE
+  Secouristes internes de jour   : [fourchette sélectionnée] → [X] min (valeur calcul)
+  Secouristes internes de nuit   : [fourchette sélectionnée] → [X] min (valeur calcul)
+  Secours publics (144/1414)     : [fourchette sélectionnée] → [X] min (valeur calcul)
+  Accès technique au lieu        : [fourchette sélectionnée] → [X] min (valeur calcul)
+
+  CALCUL t_max PAR PÉRIODE :
+    [Formule complète avec valeurs pour chaque période]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAIL TECHNIQUE — CHARGE COGNITIVE
+  Q_COG_1 : [réponse]
+  Q_COG_2 : [réponse si applicable]
+  Code résultant : [C1/C2/C3]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAIL TECHNIQUE — INFRASTRUCTURE
+  Couverture réseau    : [code]
+  Centrale d'alarme    : [code] — [nom]
+  Couverture GPS       : [OUI/NON/PARTIELLE]
+  Outils disponibles   : [liste codes]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Base légale : OPA RS 832.30 art. 8 al. 1
+```
+
+---
+
+## PARTIE 7bis — RÈGLES D'EXPÉRIENCE UTILISATEUR (UX)
+
+### Règle UX-1 : Sauvegarde automatique
+
+Sauvegarde automatique en `localStorage` à chaque champ modifié. L'utilisateur peut fermer le navigateur et reprendre sans perdre ses données. Statut **BROUILLON** tant que l'analyse n'est pas finalisée explicitement par l'utilisateur.
+
+### Règle UX-2 : Sidebar résumé en temps réel
+
+Afficher une sidebar visible en permanence pendant le formulaire, contenant en temps réel :
+
+- Tâche analysée (titre)
+- Périodes actives sélectionnées
+- Zone calculée à ce stade (mise à jour en temps réel)
+- Premier point bloquant identifié si applicable (NO-GO, incompatibilité outil, etc.)
+- Niveau en cours dans le wizard (1/4, 2/4, etc.)
+
+### Règle UX-3 : Écran d'introduction
+
+Afficher un écran d'introduction avant le premier formulaire (3 étapes maximum). Contenu :
+
+1. **Définition** : qu'est-ce qu'un travailleur isolé selon la SUVA ?
+2. **Méthode** : les 4 niveaux de l'analyse en résumé visuel (Gate réglementaire → Matrice → Faisabilité sauvetage → Validation outil → Décision)
+3. **Préparation** : liste des informations à rassembler avant de commencer :
+   - Délais d'arrivée des secouristes internes (jour et nuit si applicable)
+   - Délai d'arrivée de l'ambulance (appeler le 144 si inconnu)
+   - Inventaire des équipements d'alerte disponibles (PTI, DATI, radio, etc.)
+   - Description précise de la tâche et du lieu de travail
+
+### Règle UX-4 : Bouton "Je ne sais pas" sur les champs délai
+
+Si l'utilisateur bloque sur un champ délai et ne sait pas quoi saisir, proposer un bouton **"Je ne sais pas"** qui :
+
+- Saisit la valeur la plus défavorable de la fourchette
+- Affiche : "Valeur prudente utilisée — à vérifier et corriger."
+- Documente l'incertitude dans le rapport (mention visible en couche 2)
+- Évite l'abandon du formulaire
 
 ---
 
