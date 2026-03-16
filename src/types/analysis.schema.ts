@@ -139,6 +139,32 @@ export const Level3ResultSchema = z.object({
 
 export type Level3Result = z.infer<typeof Level3ResultSchema>;
 
+export const COGNITIVE_LOAD_LEVELS_ENUM = ["C1", "C2", "C3"] as const;
+export const CognitiveLoadLevelSchema = z.enum(COGNITIVE_LOAD_LEVELS_ENUM);
+
+export const ALERT_VALIDATION_STATUSES = [
+  "compatible",
+  "incompatible",
+  "with_reserves",
+] as const;
+export const AlertValidationStatusSchema = z.enum(ALERT_VALIDATION_STATUSES);
+
+export const AlertValidationResultSchema = z.object({
+  compatible: z.boolean(),
+  status: AlertValidationStatusSchema,
+  measures: z.array(z.string()),
+  reason: z.string(),
+});
+
+export const Level4ResultSchema = z.object({
+  cognitiveLoad: CognitiveLoadLevelSchema,
+  equipmentType: z.string().min(1, "Ce champ est requis"),
+  validationResult: AlertValidationResultSchema,
+  correctiveMeasures: z.string().max(1000).default(""),
+});
+
+export type Level4Result = z.infer<typeof Level4ResultSchema>;
+
 export const AnalysisSchema = z.object({
   id: z.string().uuid(),
   entreprise: z.string().min(1).max(100),
@@ -155,6 +181,7 @@ export const AnalysisSchema = z.object({
   level1Result: Level1ResultSchema.optional(),
   level2Result: Level2ResultSchema.optional(),
   level3Result: Level3ResultSchema.optional(),
+  level4Result: Level4ResultSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

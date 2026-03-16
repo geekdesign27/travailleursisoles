@@ -8,6 +8,7 @@ import { Step01Identification } from "@/features/wizard/steps/Step01Identificati
 import { Step02Level1Gate } from "@/features/wizard/steps/Step02Level1Gate";
 import { Step03Level2Risk } from "@/features/wizard/steps/Step03Level2Risk";
 import { Step04Level3Rescue } from "@/features/wizard/steps/Step04Level3Rescue";
+import { Step05Level4Alert } from "@/features/wizard/steps/Step05Level4Alert";
 
 function WizardNewAnalysis() {
   return (
@@ -41,6 +42,14 @@ function WizardLevel3() {
   );
 }
 
+function WizardLevel4() {
+  return (
+    <WizardLayout sidebar={<WizardSidebar />}>
+      <Step05Level4Alert />
+    </WizardLayout>
+  );
+}
+
 // Placeholder for future story pages
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -68,6 +77,7 @@ export default function App() {
             <Route path="/analysis/:id/level-1" element={<WizardLevel1 />} />
             <Route path="/analysis/:id/level-2" element={<WizardLevel2 />} />
             <Route path="/analysis/:id/level-3" element={<WizardLevel3 />} />
+            <Route path="/analysis/:id/level-4" element={<WizardLevel4 />} />
             <Route
               path="/analysis/:id/level-:level"
               element={<PlaceholderPage title="Wizard — Niveau" />}
