@@ -2,6 +2,7 @@
 stepsCompleted:
   - step-01-init
   - step-02-context
+  - step-03-starter
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
@@ -50,7 +51,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 
 ### Technical Constraints & Dependencies
 
-- **Stack imposée** : React 18, TypeScript, Vite, TailwindCSS, Shadcn UI (Radix UI)
+- **Stack imposée** : React 19, TypeScript, Vite 8, TailwindCSS v4, Shadcn UI (Radix UI)
 - **Zéro backend** : SPA statique déployée sur Vercel/Cloudflare Pages
 - **Google Sheets comme "BDD"** : API v4, OAuth2, 5 onglets, ~80 colonnes par analyse
 - **Offline-first** : localStorage comme couche primaire, Google Sheets en sync différée
@@ -65,4 +66,55 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 3. **Persistance duale et synchronisation** — localStorage + Google Sheets avec gestion des conflits, mode hors-ligne, et dégradation gracieuse. Pattern transversal sur toute la couche données.
 4. **Multi-période** — chaque analyse peut avoir des résultats différents par période (jour/nuit/weekend). Impacte le wizard, le moteur de calcul, le rapport, et le modèle de données.
 5. **Vulgarisation computationnelle** — les questionnaires intermédiaires (probabilité, charge cognitive) calculent les codes techniques en coulisses. Pattern de mapping réponses → codes utilisé dans plusieurs parties du wizard.
+
+## Starter Template Evaluation
+
+### Primary Technology Domain
+
+Web App SPA (Single Page Application) client-side-only, basée sur les exigences du PRD et du cahier des charges.
+
+### Versions Technologiques Vérifiées (mars 2026)
+
+| Package | Version | Notes |
+|---------|---------|-------|
+| Vite | 8.0.0 | Rolldown (bundler Rust), builds 10-30x plus rapides |
+| React | 19.2.4 | Mise à jour depuis React 18 (PRD) — version courante, supportée par tout l'écosystème |
+| TailwindCSS | 4.2.1 | Config CSS-first via `@theme`, plugin Vite natif `@tailwindcss/vite` |
+| Shadcn UI CLI | v4 | Scaffolding complet Vite, primitives Radix UI unifiées |
+| Radix UI | 1.4.3 | Package unifié `radix-ui` (remplace les packages individuels `@radix-ui/react-*`) |
+| TypeScript | 5.x | Strict mode |
+
+### Starter Options Considered
+
+| Option | Avantages | Inconvénients | Verdict |
+|--------|-----------|---------------|---------|
+| **Shadcn CLI v4** (`npx shadcn@latest init -t vite`) | Officiel, toujours à jour, une commande, Tailwind v4 + Radix UI auto-configurés | Moins de contrôle sur l'étape initiale | **Retenu** |
+| Vite CLI + init manuelle | Contrôle total sur chaque étape | 2 étapes au lieu d'une, même résultat | Alternative viable |
+| Starters communautaires (doinel1a, dan5py) | Pré-configurés avec linting/hooks | Risque de non-maintenance, opinions superflues | Écarté |
+
+### Selected Starter: Shadcn CLI v4
+
+**Rationale :** Officiellement maintenu, scaffolde exactement la stack requise (Vite + React + TypeScript + Tailwind v4 + Shadcn UI) en une seule commande. Aucune dépendance tierce. Compatible avec la stratégie de copie-dans-le-projet de Shadcn UI (composants personnalisables, pas de lock-in).
+
+**Initialization Command:**
+
+```bash
+npx shadcn@latest init -t vite -n analyse-travailleurs-isoles
+cd analyse-travailleurs-isoles
+npx shadcn@latest add button card dialog badge tooltip tabs separator
+npm run dev
+```
+
+**Architectural Decisions Provided by Starter:**
+
+- **Language & Runtime :** TypeScript strict, React 19, SWC pour le dev server
+- **Styling :** TailwindCSS v4 via `@tailwindcss/vite` plugin — config CSS-first, palette de couleurs Tailwind définie dans `@theme { }`
+- **Build :** Vite 8 + Rolldown — builds de production ultra-rapides
+- **Composants UI :** Shadcn UI copiés dans `/src/components/ui/`, stylés via Tailwind, basés sur Radix UI 1.4.3
+- **Structure de base :** `/src/components/ui/`, `/src/lib/utils.ts` (cn helper)
+- **Dev Experience :** Hot reload instantané, TypeScript type-checking, path aliases `@/`
+
+**Changement majeur Tailwind v4 :** Plus de `tailwind.config.js` ni de `postcss.config.js`. Configuration via `@theme { }` directement dans le CSS. Plugin Vite natif `@tailwindcss/vite`. Détection automatique du contenu. Builds 5x plus rapides.
+
+**Note :** L'initialisation du projet via cette commande sera la première story d'implémentation.
 
