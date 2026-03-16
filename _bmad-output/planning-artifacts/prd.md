@@ -9,6 +9,7 @@ stepsCompleted:
   - step-05-domain
   - step-06-innovation
   - step-07-project-type
+  - step-08-scoping
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -381,3 +382,93 @@ Priorité : **tablette** pour les visites terrain (iPad, Android tablet). Le for
 - localStorage comme couche primaire de persistance
 - Synchronisation Google Sheets quand disponible
 - Aucune fonctionnalité bloquée si hors-ligne (sauf sync)
+
+## Project Scoping & Phased Development
+
+### MVP Strategy & Philosophy
+
+**Approche MVP : "Problem-Solving MVP" complet**
+
+Le produit résout un problème métier précis (analyse de travailleurs isolés conforme SUVA) dans un domaine où aucune alternative digitale n'existe. La stratégie n'est pas de livrer un sous-ensemble minimal, mais de livrer la **méthode complète en version digitale** — car une méthode SUVA à moitié implémentée n'a aucune valeur terrain.
+
+Le product brief le confirme : "La spécification logique est suffisamment détaillée et le périmètre fonctionnel suffisamment bien cerné pour construire le produit complet d'emblée."
+
+**Ressources :** Développeur solo (Pierre-Alain, vibecodeur) avec assistance IA.
+
+### MVP Feature Set (Phase 1)
+
+**Core User Journeys Supported :** Marc — Analyse complète + Marc — Cas limite
+
+**Must-Have Capabilities :**
+
+| # | Capacité | Justification |
+|---|----------|---------------|
+| 1 | Wizard 4 niveaux complet | Cœur du produit — sans ça, pas de produit |
+| 2 | Gate réglementaire (14 questions GO/NO-GO) | Niveau 1 — arrêt immédiat si travail réglementé |
+| 3 | Matrice SUVA 5×5 | Niveau 2 — calcul de la zone de base |
+| 4 | Questionnaires intermédiaires en langage naturel | Différenciateur clé — vulgarisation computationnelle |
+| 5 | Calcul t_max par période | Niveau 3 — faisabilité du sauvetage |
+| 6 | Reclassement automatique (t_max ≤ 0 → Zone 2) | Règle R4 — sécurité réglementaire |
+| 7 | Validation outil d'alerte | Niveau 4 — complète la chaîne d'analyse |
+| 8 | Rapport bi-couche | Valeur délivrée — couche 1 (cadre) + couche 2 (spécialiste) |
+| 9 | Distinction visuelle [SUVA_CONST] / [CONFIG] | Confiance réglementaire |
+| 10 | Persistance localStorage | Sauvegarde automatique, reprise d'analyse interrompue |
+| 11 | Export PDF | Livrable tangible — le rapport professionnel |
+| 12 | Export CSV | Intégration avec les systèmes existants |
+| 13 | Déploiement statique (Vercel) | Mise en ligne immédiate, zéro ops |
+
+**Explicitement hors Phase 1 :**
+- Google Sheets (ajouté en Phase 2)
+- Dashboard consolidé (Phase 3)
+- Sidebar résumé temps réel (Phase 2)
+- Onboarding / introduction (Phase 3)
+
+### Post-MVP Features
+
+**Phase 2 — Intégration données :**
+
+| # | Fonctionnalité | Dépend de |
+|---|---------------|-----------|
+| 1 | Connexion Google Sheets (OAuth2) | Phase 1 complète |
+| 2 | Synchronisation analyses → Sheet | Connexion OAuth2 |
+| 3 | Lecture configuration entreprise depuis Sheet | Connexion OAuth2 |
+| 4 | Sidebar résumé temps réel | Wizard Phase 1 |
+| 5 | Configuration entreprise de base | Google Sheets |
+
+**Parcours débloqué :** Marc admin — Configuration entreprise + Sandra — Rapport (via consolidation Sheet)
+
+**Phase 3 — Expérience complète :**
+
+| # | Fonctionnalité | Valeur ajoutée |
+|---|---------------|----------------|
+| 1 | Dashboard consolidé multi-analyses | Vue d'ensemble par entreprise |
+| 2 | Taxonomies paramétrables complètes | Personnalisation métier |
+| 3 | Logo entreprise dans PDF | Professionnalisme du rapport |
+| 4 | Écran d'introduction / onboarding | Autonomie des nouveaux utilisateurs |
+| 5 | Alertes de révision | Conformité continue |
+| 6 | Mode comparaison entre analyses | Aide à la décision |
+| 7 | Import CSV | Migration données existantes |
+
+### Risk Mitigation Strategy
+
+**Risques techniques :**
+
+| Risque | Probabilité | Impact | Mitigation |
+|--------|------------|--------|-----------|
+| Complexité du moteur de calcul (matrice + t_max + reclassement) | Moyenne | Élevé | La spécification logique est exhaustive — implémenter un algorithme à la fois, tester unitairement chaque cellule de la matrice |
+| Génération PDF côté client (rendu complexe) | Moyenne | Moyen | Commencer par un export simple, itérer sur le design. Fallback : export HTML imprimable |
+| Quota API Google Sheets | Faible | Moyen | localStorage comme couche primaire — Sheet en sync différée |
+
+**Risques marché :**
+
+| Risque | Mitigation |
+|--------|-----------|
+| Les spécialistes STPS ne changent pas leurs habitudes | Pierre-Alain est le premier utilisateur — validation terrain en conditions réelles avant diffusion |
+| La norme SUVA évolue | Architecture avec constantes réglementaires isolées et versionnées |
+
+**Risques ressource :**
+
+| Risque | Mitigation |
+|--------|-----------|
+| Développeur solo = bus factor 1 | Code propre, TypeScript strict, tests unitaires sur le moteur de calcul |
+| Scope trop large pour une personne | Phases clairement découpées — Phase 1 livrable indépendamment |
