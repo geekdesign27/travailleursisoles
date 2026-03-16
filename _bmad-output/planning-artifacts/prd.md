@@ -4,6 +4,7 @@ stepsCompleted:
   - step-02-discovery
   - step-02b-vision
   - step-02c-executive-summary
+  - step-03-success
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -52,3 +53,80 @@ Utilisateurs cibles : les spécialistes STPS / consultants SST qui conduisent le
 | **Domaine** | Sécurité au travail / Conformité réglementaire suisse |
 | **Complexité** | Élevée — réglementation SUVA, OPA, OTConst ; algorithmes de calcul réglementaires ; matrice 5×5 ; logique 4 niveaux avec gates |
 | **Contexte** | Greenfield — nouveau produit, aucun code existant |
+
+## Success Criteria
+
+### User Success
+
+| Critère | Métrique | Cible |
+|---------|----------|-------|
+| **Temps par analyse** | Durée du début du wizard au rapport finalisé | < 30 minutes (vs 2-4h estimées sur papier/Excel) |
+| **Zéro blocage de saisie** | Les questionnaires intermédiaires suffisent à déterminer les codes techniques | < 1 utilisation "Je ne sais pas" par analyse en moyenne |
+| **Complétude des analyses** | % d'analyses démarrées qui atteignent le rapport final | > 80% |
+| **Rapport auto-suffisant** | Le rapport couche 1 est compris par un cadre non-spécialiste sans reformulation orale | Le spécialiste n'a pas besoin de "traduire" le rapport |
+| **Confiance réglementaire** | L'utilisateur sait précisément ce qui est imposé [SUVA_CONST] vs ajustable [CONFIG] | Distinction claire et visible dans l'interface à chaque étape |
+
+### Business Success
+
+| Objectif | Horizon | Indicateur |
+|----------|---------|-----------|
+| **Validation terrain** | 3 mois | Pierre-Alain utilise l'outil pour ses propres mandats SST et le préfère à sa méthode actuelle |
+| **Adoption pair-à-pair** | 6 mois | 4-5 collègues spécialistes STPS utilisent l'outil activement |
+| **Positionnement expert** | 12 mois | L'outil devient une référence citée dans le milieu SST suisse romand |
+| **Modèle économique** | À définir | Outil gratuit en phase 1 — monétisation à évaluer après validation terrain |
+
+### Technical Success
+
+| Critère | Métrique | Cible |
+|---------|----------|-------|
+| **Exactitude réglementaire** | Conformité des calculs avec la matrice SUVA et les formules de la spécification | 100% — zéro écart sur les constantes [SUVA_CONST] |
+| **Persistance fiable** | Données sauvegardées en localStorage ET synchronisées avec Google Sheets | Aucune perte de données, reprise d'analyse interrompue fonctionnelle |
+| **Performance** | Temps de chargement initial et transitions entre étapes du wizard | < 2s chargement initial, transitions instantanées |
+| **Responsive tablette** | Interface utilisable sur tablette pour les visites terrain | Formulaire complet utilisable sans zoom ni scroll horizontal |
+
+### Measurable Outcomes
+
+- **Réduction du temps** : une analyse complète en < 30 min vs 2-4h actuellement = gain de productivité ×4 minimum
+- **Qualité documentaire** : 100% des analyses finalisées passent toutes les validations croisées (cohérence entre niveaux, t_max calculé, outil d'alerte validé)
+- **Couverture méthodologique** : les 4 niveaux SUVA + surcouche opérationnelle sont opérationnels avec tous les algorithmes de la spécification logique
+- **Adoption mesurable** : nombre d'analyses créées et finalisées par mois par utilisateur
+
+## Product Scope
+
+### MVP - Minimum Viable Product
+
+> **Note importante :** Le product brief définit explicitement qu'il n'y a pas de découpage MVP progressif. La V1 livre l'intégralité des fonctionnalités car la spécification logique est suffisamment détaillée et le périmètre bien cerné. Cependant, pour structurer le développement, le scope est organisé en phases de livraison.
+
+**Phase 1 — Cœur fonctionnel (MVP technique) :**
+- Wizard 4 niveaux complet (gate réglementaire → matrice SUVA → faisabilité sauvetage → validation outil d'alerte)
+- Questionnaires intermédiaires en langage naturel
+- Moteur de calcul complet (matrice SUVA, t_max, scores composites, reclassement automatique)
+- Rapport bi-couche (langage naturel + détail technique)
+- Distinction visuelle [SUVA_CONST] / [CONFIG]
+- Unité d'analyse TÂCHE × PÉRIODE
+- Persistance localStorage + export PDF/CSV
+- Déploiement statique
+
+**Phase 2 — Intégration données :**
+- Connexion Google Sheets (OAuth2, synchronisation, multi-tenant)
+- Configuration entreprise de base
+- Sidebar résumé temps réel
+
+### Growth Features (Post-MVP)
+
+- Dashboard consolidé (vue d'ensemble multi-analyses, statuts, alertes de révision)
+- Taxonomies paramétrables complètes
+- Logo entreprise dans PDF
+- Écran d'introduction / onboarding 3 étapes
+- Mode comparaison entre analyses
+- Import CSV
+
+### Vision (Future)
+
+- Multi-langue (allemand, italien) pour couvrir toute la Suisse
+- Bibliothèque de cas types par secteur (industrie, BTP, santé, agriculture)
+- Mode collaboratif multi-spécialistes
+- API / connecteurs vers logiciels SST du marché suisse
+- Intelligence augmentée (suggestions basées sur l'historique)
+- Certification / labellisation officielle SUVA ou organismes STPS
+- PWA mode hors-ligne pour les visites terrain sans réseau
