@@ -4,6 +4,7 @@ stepsCompleted:
   - step-02-context
   - step-03-starter
   - step-04-decisions
+  - step-05-patterns
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
@@ -203,4 +204,133 @@ localStorage (primaire) → Queue de modifications → Batch sync → Google She
 - Zod schema → React Hook Form validation → localStorage persistence → Google Sheets sync
 - Moteur de calcul → Wizard (recalcul temps réel) → Rapport (données calculées)
 - Shadcn UI composants de base → Composants métier → Pages
+
+## Implementation Patterns & Consistency Rules
+
+### Naming Patterns
+
+**Fichiers et dossiers :**
+- Composants React : `PascalCase.tsx` → `RiskMatrix.tsx`, `ZoneBadge.tsx`
+- Hooks : `camelCase.ts` avec préfixe `use` → `useAnalysis.ts`, `useLocalStorage.ts`
+- Utilitaires/fonctions pures : `camelCase.ts` → `matrixCalculator.ts`, `tmaxCalculator.ts`
+- Constantes : `camelCase.ts` → `suvaConstants.ts`
+- Types/schémas Zod : `camelCase.schema.ts` → `analysis.schema.ts`
+- Tests : co-localisés `*.test.ts` → `matrixCalculator.test.ts` à côté de `matrixCalculator.ts`
+
+**Code TypeScript :**
+- Variables/fonctions : `camelCase` → `calculateTmax`, `zoneBase`
+- Types/interfaces : `PascalCase` → `Analysis`, `WizardStep`, `ZoneRisque`
+- Constantes réglementaires : `SCREAMING_SNAKE_CASE` → `SUVA_MATRIX`, `ZONE_DESCRIPTIONS`
+- Enums/unions : `PascalCase` pour le type, valeurs littérales telles que dans la spec → `'3a' | '3b'`, `'A' | 'B' | 'C'`
+
+**Composants React :**
+- Nommage : `PascalCase` → `<WizardStep />`, `<RiskMatrix />`
+- Props : interface `PascalCase` + suffixe `Props` → `RiskMatrixProps`
+- Un composant par fichier, nom du fichier = nom du composant
+
+### Structure Patterns
+
+**Organisation par feature :**
+```
+/src
+  /features
+    /wizard          → FR1-FR18 : wizard 4 niveaux
+      /steps         → composants des étapes du wizard
+      /hooks         → useWizardNavigation, useWizardForm
+      wizard.schema.ts
+    /engine          → moteur de calcul réglementaire
+      matrixCalculator.ts      + .test.ts
+      tmaxCalculator.ts        + .test.ts
+      reclassement.ts          + .test.ts
+      alertToolValidator.ts    + .test.ts
+      probabilityEstimator.ts  + .test.ts
+      cognitiveLoadEstimator.ts + .test.ts
+    /report          → FR19-FR24 : rapport bi-couche + exports
+    /persistence     → FR29-FR34 : localStorage + Google Sheets sync
+    /config          → FR35-FR38 : configuration entreprise
+    /dashboard       → FR39-FR41 : liste consolidée
+    /help            → FR42-FR44 : aide contextuelle, sidebar, onboarding
+  /components
+    /ui              → Shadcn UI (auto-généré)
+    /shared          → composants métier partagés (ZoneBadge, SuvaTooltip)
+  /constants
+    suvaMatrix.ts    → SUVA_REGULATORY_CONSTANT
+    suvaRules.ts     → R1-R7
+    suvaZones.ts     → descriptions des zones
+    regulatedWork.ts → 14 travaux réglementés + références légales
+  /lib
+    utils.ts         → cn() helper Shadcn
+  /types
+    analysis.schema.ts → schéma Zod source de vérité
+```
+
+**Tests :** co-localisés à côté du fichier source. Tests e2e Playwright dans `/e2e/` à la racine.
+
+### Format Patterns
+
+**Données internes (TypeScript) :**
+- Propriétés : `camelCase` → `zoneBase`, `tmaxJour`, `chargeCognitive`
+- Dates : objets `Date` en interne, `ISO 8601` pour sérialisation
+- Booléens : `true/false` (jamais `'OUI'/'NON'` en interne)
+- Nulls : `null` (pas `undefined`) pour les valeurs explicitement absentes
+
+**Données Google Sheets (sérialisation) :**
+- Colonnes : `snake_case` comme dans la spécification logique → `zone_base`, `tmax_jour_min`
+- Valeurs enum : telles que dans la spec → `'OUI'`, `'NON'`, `'HORS_PERIMETRE'`, `'3a'`, `'3b'`
+- Mapping bidirectionnel défini dans `/features/persistence/sheetsMapper.ts`
+
+**localStorage :**
+- Clés : `app:analysis:{uuid}`, `app:analyses:index`, `app:sync:queue`, `app:config:{entreprise}`
+- Préfixe `app:` pour éviter les collisions
+
+### State Management Patterns
+
+**Contextes React :**
+- `AnalysisContext` : analyse en cours (wizard state + résultats calculés)
+- `ConfigContext` : configuration entreprise (taxonomies, Google Sheet connection)
+- `AppContext` : état global (liste analyses, sync status)
+
+**Actions useReducer :** format `DOMAIN/ACTION` → `'wizard/SET_STEP'`, `'wizard/UPDATE_FIELD'`, `'analysis/RECALCULATE'`, `'sync/QUEUE_CHANGE'`
+
+**Pattern de recalcul temps réel :**
+```
+User modifie champ → dispatch UPDATE_FIELD → middleware recalcule → dispatch RECALCULATE → UI se met à jour
+```
+Le recalcul est synchrone (< 50ms NFR3), déclenché à chaque modification dans le wizard.
+
+### Error Handling Patterns
+
+- **Error Boundaries React** : un boundary par feature (wizard, rapport, dashboard) — pas un seul global
+- **Erreurs utilisateur** : messages en français, langage clair, pas de codes techniques
+- **Erreurs de calcul réglementaire** : jamais silencieuses — toujours affichées avec le motif et la référence SUVA
+- **Erreurs Google Sheets** : dégradation gracieuse → message "Synchronisation impossible, vos données sont sauvegardées localement"
+- **Logging** : `console.warn` pour les avertissements non bloquants, `console.error` pour les erreurs bloquantes
+
+### Process Patterns
+
+**Loading states :**
+- État dans le composant concerné (pas global) : `isLoading`, `isSyncing`, `isExporting`
+- Skeleton Shadcn UI pour les chargements initiaux
+- Spinner inline pour les actions utilisateur (export PDF, sync)
+
+**Validation :**
+- Validation Zod sur chaque étape du wizard (pas uniquement à la fin)
+- Validation bloquante : empêche de passer à l'étape suivante
+- Validation avertissement : affichée mais n'empêche pas de continuer
+- Pattern conforme à la spécification logique (Partie 8 — Règles de validation)
+
+### Enforcement Guidelines
+
+**Tous les agents IA DOIVENT :**
+- Suivre l'organisation par feature — ne jamais créer de fichiers hors de la structure définie
+- Utiliser les schémas Zod existants — ne jamais créer de types manuels en doublon
+- Annoter `// SUVA_REGULATORY_CONSTANT` sur toute constante réglementaire
+- Écrire un test unitaire pour chaque fonction du moteur de calcul
+- Utiliser les composants Shadcn UI existants — ne jamais recréer un composant de base
+
+**Anti-patterns :**
+- Créer un fichier `utils.ts` fourre-tout → utiliser des modules spécifiques par feature
+- Stocker des données calculées dans localStorage → recalculer à partir des données sources
+- Mélanger logique métier et composants UI → séparer dans `/features/engine/`
+- Utiliser `any` → toujours typer via les schémas Zod
 
