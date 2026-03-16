@@ -3,6 +3,7 @@ stepsCompleted:
   - step-01-init
   - step-02-context
   - step-03-starter
+  - step-04-decisions
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
@@ -117,4 +118,89 @@ npm run dev
 **Changement majeur Tailwind v4 :** Plus de `tailwind.config.js` ni de `postcss.config.js`. Configuration via `@theme { }` directement dans le CSS. Plugin Vite natif `@tailwindcss/vite`. Détection automatique du contenu. Builds 5x plus rapides.
 
 **Note :** L'initialisation du projet via cette commande sera la première story d'implémentation.
+
+## Core Architectural Decisions
+
+### Decision Priority Analysis
+
+**Décisions critiques (bloquent l'implémentation) :**
+- Validation des données : Zod
+- Gestion formulaires : React Hook Form + Zod resolver
+- Moteur de calcul réglementaire : fonctions pures TypeScript avec tests exhaustifs
+
+**Décisions importantes (façonnent l'architecture) :**
+- Routing : React Router v7
+- Testing : Vitest + Playwright
+- Sync Google Sheets : Queue-based avec batch automatique
+- Structure localStorage : clés par analyse
+
+**Décisions différées :**
+- Aucune — V1 complète, toutes les décisions sont prises
+
+### Data Architecture
+
+| Décision | Choix | Rationale |
+|----------|-------|-----------|
+| **Validation runtime** | Zod | Schéma unique → types TypeScript + validation formulaire + validation sync. Élimine la duplication pour les ~80 colonnes du modèle de données |
+| **Structure localStorage** | Clés par analyse (`analysis:{uuid}`) + index (`analyses:index`) | Évite la sérialisation complète à chaque sauvegarde auto (30s). Performant pour les opérations fréquentes |
+| **Sync Google Sheets** | Queue-based avec sync automatique (batch 30s) | Respecte le quota Google (100 req/100s), compatible offline-first, pas de perte de données |
+| **Modèle de données** | Schéma Zod unique `AnalysisSchema` qui dérive les types TS et la validation | Source de vérité unique pour la structure de données |
+| **Données réglementaires** | Constantes TypeScript `as const` annotées `SUVA_REGULATORY_CONSTANT` | Non modifiables par l'utilisateur, testables unitairement |
+
+**Stratégie de sync détaillée :**
+```
+localStorage (primaire) → Queue de modifications → Batch sync → Google Sheets
+                                                    ↑
+                                            Timer 30s ou online event
+```
+- Les modifications s'accumulent dans `sync:queue` (localStorage)
+- Un timer (30s) ou un événement `online` déclenche le batch
+- En cas d'échec, retry avec backoff exponentiel (3 tentatives)
+- Résolution de conflits : last-write-wins (l'utilisateur est seul sur ses analyses)
+
+### Authentication & Security
+
+| Décision | Choix | Rationale |
+|----------|-------|-----------|
+| **Authentification** | Google Identity Services (OAuth2) | Imposé par l'intégration Google Sheets — scope `spreadsheets` uniquement |
+| **Tokens** | Session Google uniquement, jamais stockés en localStorage | NFR11 — sécurité des tokens |
+| **Données sensibles** | Aucune donnée personnelle des travailleurs stockée | L'analyse porte sur le poste, pas sur la personne |
+| **Isolation** | Un Google Sheet par entreprise, aucune donnée croisée | NFR12 — isolation par entreprise |
+
+### Frontend Architecture
+
+| Décision | Choix | Rationale |
+|----------|-------|-----------|
+| **State management** | React Context + useReducer | Suffisant pour une SPA sans temps réel serveur. Un contexte pour l'analyse en cours, un pour la config entreprise |
+| **Formulaires** | React Hook Form + `@hookform/resolvers/zod` | Wizard multi-step avec validation conditionnelle, renders optimisés, intégration Zod native |
+| **Routing** | React Router v7 | 7 routes principales (M1-M7), pas de data loading serveur, simple et éprouvé |
+| **Composants UI** | Shadcn UI (copiés dans le projet) + composants métier custom | Composants de base (Button, Card, Dialog, Badge, Tooltip) via Shadcn. Composants métier (RiskMatrix, ZoneBadge, WizardStep) custom |
+| **Bundle optimization** | Code splitting par route (React.lazy), tree-shaking Vite 8 | NFR1 — bundle < 200KB gzip |
+
+### Infrastructure & Deployment
+
+| Décision | Choix | Rationale |
+|----------|-------|-----------|
+| **Hébergement** | Vercel (primaire) / Cloudflare Pages (alternative) | Déploiement statique CDN, HTTPS automatique, 99.9% SLA |
+| **Testing unitaire** | Vitest | Natif Vite 8, zéro config, rapide. Couverture exhaustive du moteur de calcul réglementaire |
+| **Testing e2e** | Playwright | Multi-navigateur (Chrome, Safari, Firefox), parcours wizard complets, génération rapport |
+| **CI/CD** | GitHub Actions | Build + tests Vitest + tests Playwright sur chaque PR |
+| **Environnement** | Variables d'env Vite (`VITE_GOOGLE_CLIENT_ID`, `VITE_GOOGLE_API_KEY`) | Config Google OAuth2 par environnement |
+
+### Decision Impact Analysis
+
+**Séquence d'implémentation :**
+1. Schéma Zod + types TypeScript (fondation données)
+2. Moteur de calcul réglementaire (fonctions pures + tests Vitest)
+3. Structure localStorage + persistence hook
+4. Wizard React Hook Form + routing React Router
+5. Rapport bi-couche + exports (PDF, CSV)
+6. Google Sheets sync (OAuth2 + queue-based)
+7. Configuration entreprise + dashboard
+8. Aide contextuelle + onboarding
+
+**Dépendances croisées :**
+- Zod schema → React Hook Form validation → localStorage persistence → Google Sheets sync
+- Moteur de calcul → Wizard (recalcul temps réel) → Rapport (données calculées)
+- Shadcn UI composants de base → Composants métier → Pages
 
