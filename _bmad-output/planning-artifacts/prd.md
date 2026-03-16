@@ -22,6 +22,8 @@ editHistory:
     changes: "DaisyUI remplacé par Shadcn UI + palette Tailwind dans Executive Summary et Web App Requirements"
   - date: 2026-03-16
     changes: "Post-validation: FR2/FR9/FR37/FR42 affinées SMART, FR29-34 abstraction implémentation, FR8/FR21 intégrées parcours"
+  - date: 2026-03-16
+    changes: "Alignement Brief/PRD: suppression phasage Phase 1/2/3, V1 livre l'intégralité des 44 FRs, section Scoping réécrite avec séquence d'implémentation par blocs"
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -90,7 +92,7 @@ Utilisateurs cibles : les spécialistes STPS / consultants SST qui conduisent le
 | **Validation terrain** | 3 mois | Pierre-Alain utilise l'outil pour ses propres mandats SST et le préfère à sa méthode actuelle |
 | **Adoption pair-à-pair** | 6 mois | 4-5 collègues spécialistes STPS utilisent l'outil activement |
 | **Positionnement expert** | 12 mois | L'outil devient une référence citée dans le milieu SST suisse romand |
-| **Modèle économique** | À définir | Outil gratuit en phase 1 — monétisation à évaluer après validation terrain |
+| **Modèle économique** | À définir | Outil gratuit au lancement — monétisation à évaluer après validation terrain |
 
 ### Technical Success
 
@@ -337,71 +339,57 @@ Priorité : **tablette** pour les visites terrain (iPad, Android tablet). Le for
 - Synchronisation Google Sheets quand disponible
 - Aucune fonctionnalité bloquée si hors-ligne (sauf sync)
 
-## Project Scoping & Phased Development
+## Project Scoping & Development Strategy
 
-### MVP Strategy & Philosophy
+### V1 Strategy & Philosophy
 
-**Approche MVP : "Problem-Solving MVP" complet**
+**Approche : V1 complète — pas de découpage MVP**
 
-Le produit résout un problème métier précis (analyse de travailleurs isolés conforme SUVA) dans un domaine où aucune alternative digitale n'existe. La stratégie n'est pas de livrer un sous-ensemble minimal, mais de livrer la **méthode complète en version digitale** — car une méthode SUVA à moitié implémentée n'a aucune valeur terrain.
+Le produit résout un problème métier précis (analyse de travailleurs isolés conforme SUVA) dans un domaine où aucune alternative digitale n'existe. Une méthode SUVA à moitié implémentée n'a aucune valeur terrain. La V1 livre l'intégralité des 44 FRs.
 
-Le product brief le confirme : "La spécification logique est suffisamment détaillée et le périmètre fonctionnel suffisamment bien cerné pour construire le produit complet d'emblée."
+Le product brief le confirme : "La spécification logique est suffisamment détaillée et le périmètre fonctionnel suffisamment bien cerné pour construire le produit complet d'emblée. Pas de découpage MVP — V1 livre l'intégralité."
 
 **Ressources :** Développeur solo (Pierre-Alain, vibecodeur) avec assistance IA.
 
-### MVP Feature Set (Phase 1)
+### V1 Feature Set (44 FRs — intégralité)
 
-**Core User Journeys Supported :** Marc — Analyse complète + Marc — Cas limite
+**Tous les parcours utilisateurs supportés :** Marc — Analyse complète + Marc — Cas limite + Sandra — Rapport + Marc admin — Configuration entreprise
 
-**Must-Have Capabilities :**
+**Capacités V1 :**
 
 | # | Capacité | Justification |
 |---|----------|---------------|
-| 1 | Wizard 4 niveaux complet | Cœur du produit — sans ça, pas de produit |
+| 1 | Wizard 4 niveaux complet (FR1-FR18) | Cœur du produit — sans ça, pas de produit |
 | 2 | Gate réglementaire (14 questions GO/NO-GO) | Niveau 1 — arrêt immédiat si travail réglementé |
 | 3 | Matrice SUVA 5×5 | Niveau 2 — calcul de la zone de base |
 | 4 | Questionnaires intermédiaires en langage naturel | Différenciateur clé — vulgarisation computationnelle |
 | 5 | Calcul t_max par période | Niveau 3 — faisabilité du sauvetage |
 | 6 | Reclassement automatique (t_max ≤ 0 → Zone 2) | Règle R4 — sécurité réglementaire |
 | 7 | Validation outil d'alerte | Niveau 4 — complète la chaîne d'analyse |
-| 8 | Rapport bi-couche | Valeur délivrée — couche 1 (cadre) + couche 2 (spécialiste) |
+| 8 | Rapport bi-couche (FR19-FR24) | Valeur délivrée — couche 1 (cadre) + couche 2 (spécialiste) |
 | 9 | Distinction visuelle [SUVA_CONST] / [CONFIG] | Confiance réglementaire |
-| 10 | Persistance localStorage | Sauvegarde automatique, reprise d'analyse interrompue |
-| 11 | Export PDF | Livrable tangible — le rapport professionnel |
-| 12 | Export CSV | Intégration avec les systèmes existants |
-| 13 | Déploiement statique (Vercel) | Mise en ligne immédiate, zéro ops |
+| 10 | Persistance localStorage + Google Sheets (FR29-FR34) | Sauvegarde locale + synchronisation cloud |
+| 11 | Export PDF + CSV | Livrable tangible — rapport professionnel + données brutes |
+| 12 | Configuration entreprise (FR35-FR38) | Taxonomies, départements, équipements DATI |
+| 13 | Dashboard consolidé (FR39-FR41) | Vue d'ensemble, filtres, alertes de révision |
+| 14 | Guidage complet (FR42-FR44) | Aide contextuelle, sidebar résumé, onboarding |
+| 15 | Déploiement statique (Vercel) | Mise en ligne immédiate, zéro ops |
 
-**Explicitement hors Phase 1 :**
-- Google Sheets (ajouté en Phase 2)
-- Dashboard consolidé (Phase 3)
-- Sidebar résumé temps réel (Phase 2)
-- Onboarding / introduction (Phase 3)
+### Séquence d'implémentation recommandée
 
-### Post-MVP Features
+L'implémentation suit un ordre logique de dépendances techniques, pas un découpage en phases de livraison :
 
-**Phase 2 — Intégration données :**
-
-| # | Fonctionnalité | Dépend de |
-|---|---------------|-----------|
-| 1 | Connexion Google Sheets (OAuth2) | Phase 1 complète |
-| 2 | Synchronisation analyses → Sheet | Connexion OAuth2 |
-| 3 | Lecture configuration entreprise depuis Sheet | Connexion OAuth2 |
-| 4 | Sidebar résumé temps réel | Wizard Phase 1 |
-| 5 | Configuration entreprise de base | Google Sheets |
-
-**Parcours débloqué :** Marc admin — Configuration entreprise + Sandra — Rapport (via consolidation Sheet)
-
-**Phase 3 — Expérience complète :**
-
-| # | Fonctionnalité | Valeur ajoutée |
-|---|---------------|----------------|
-| 1 | Dashboard consolidé multi-analyses | Vue d'ensemble par entreprise |
-| 2 | Taxonomies paramétrables complètes | Personnalisation métier |
-| 3 | Logo entreprise dans PDF | Professionnalisme du rapport |
-| 4 | Écran d'introduction / onboarding | Autonomie des nouveaux utilisateurs |
-| 5 | Alertes de révision | Conformité continue |
-| 6 | Mode comparaison entre analyses | Aide à la décision |
-| 7 | Import CSV | Migration données existantes |
+| Étape | Bloc fonctionnel | Dépendances |
+|-------|-----------------|-------------|
+| 1 | Moteur de calcul (matrice SUVA, t_max, reclassement) | Aucune — fondation technique |
+| 2 | Wizard 4 niveaux (FR1-FR18) | Moteur de calcul |
+| 3 | Persistance localStorage (FR29-FR30) | Wizard |
+| 4 | Rapport bi-couche + exports (FR19-FR24) | Wizard + moteur de calcul |
+| 5 | Conformité réglementaire (FR25-FR28) | Transversal — intégré à chaque étape |
+| 6 | Google Sheets + OAuth2 (FR31-FR34) | Wizard + persistance locale |
+| 7 | Configuration entreprise (FR35-FR38) | Google Sheets |
+| 8 | Dashboard consolidé (FR39-FR41) | Persistance |
+| 9 | Guidage et aide (FR42-FR44) | Wizard complet |
 
 ### Risk Mitigation Strategy
 
@@ -412,6 +400,7 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 | Complexité du moteur de calcul (matrice + t_max + reclassement) | Moyenne | Élevé | La spécification logique est exhaustive — implémenter un algorithme à la fois, tester unitairement chaque cellule de la matrice |
 | Génération PDF côté client (rendu complexe) | Moyenne | Moyen | Commencer par un export simple, itérer sur le design. Fallback : export HTML imprimable |
 | Quota API Google Sheets | Faible | Moyen | localStorage comme couche primaire — Sheet en sync différée |
+| Scope complet pour V1 | Moyenne | Moyen | Séquence d'implémentation par blocs indépendants — chaque bloc est testable isolément |
 
 **Risques marché :**
 
@@ -425,7 +414,7 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 | Risque | Mitigation |
 |--------|-----------|
 | Développeur solo = bus factor 1 | Code propre, TypeScript strict, tests unitaires sur le moteur de calcul |
-| Scope trop large pour une personne | Phases clairement découpées — Phase 1 livrable indépendamment |
+| Scope V1 complet ambitieux pour une personne | Séquence d'implémentation par blocs — progression incrémentale mesurable, chaque bloc livre de la valeur testable |
 
 ## Functional Requirements
 
@@ -470,29 +459,29 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 
 - **FR29:** Le système sauvegarde automatiquement l'analyse en cours localement dans le navigateur (toutes les 30s ou à chaque changement d'étape)
 - **FR30:** Le spécialiste peut reprendre une analyse interrompue après fermeture du navigateur ou coupure de courant
-- **FR31:** Le spécialiste peut connecter un espace de stockage cloud d'entreprise pour la synchronisation des données (Phase 2)
-- **FR32:** Le système synchronise les analyses avec l'espace de stockage cloud connecté (Phase 2)
-- **FR33:** Le système crée automatiquement la structure de données dans l'espace de stockage cloud au premier accès (Phase 2)
+- **FR31:** Le spécialiste peut connecter un espace de stockage cloud d'entreprise pour la synchronisation des données
+- **FR32:** Le système synchronise les analyses avec l'espace de stockage cloud connecté
+- **FR33:** Le système crée automatiquement la structure de données dans l'espace de stockage cloud au premier accès
 - **FR34:** Le système reste 100% fonctionnel sans connexion internet (sauvegarde locale seule, synchronisation cloud différée)
 
 ### Configuration entreprise
 
-- **FR35:** Le spécialiste peut configurer les départements et services de l'entreprise (Phase 2)
-- **FR36:** Le spécialiste peut configurer la liste des équipements DATI disponibles (Phase 2)
-- **FR37:** Le spécialiste peut personnaliser jusqu'à 5 champs taxonomiques [CONFIG] (départements, types d'équipement, types d'alerte, libellés de fréquence, prestataires de formation) avec validation de format (Phase 3)
+- **FR35:** Le spécialiste peut configurer les départements et services de l'entreprise
+- **FR36:** Le spécialiste peut configurer la liste des équipements DATI disponibles
+- **FR37:** Le spécialiste peut personnaliser jusqu'à 5 champs taxonomiques [CONFIG] (départements, types d'équipement, types d'alerte, libellés de fréquence, prestataires de formation) avec validation de format
 - **FR38:** Le spécialiste ne peut pas modifier les constantes réglementaires [SUVA_CONST]
 
 ### Dashboard et consolidation
 
-- **FR39:** Le spécialiste peut consulter la liste de toutes les analyses sauvegardées avec leur statut et leur zone (Phase 3)
-- **FR40:** Le spécialiste peut filtrer et rechercher des analyses par entreprise, département, zone, statut (Phase 3)
-- **FR41:** Le système signale les analyses dont la date de révision est dépassée (Phase 3)
+- **FR39:** Le spécialiste peut consulter la liste de toutes les analyses sauvegardées avec leur statut et leur zone
+- **FR40:** Le spécialiste peut filtrer et rechercher des analyses par entreprise, département, zone, statut
+- **FR41:** Le système signale les analyses dont la date de révision est dépassée
 
 ### Guidage et aide contextuelle
 
 - **FR42:** Le système affiche un tooltip d'aide contextuelle sur 100% des champs de saisie du wizard (Niveaux 1-4), couvrant la définition réglementaire, un exemple et les erreurs courantes
-- **FR43:** Le système affiche un résumé dynamique de l'analyse en cours mis à jour en temps réel (Phase 2)
-- **FR44:** Le système présente un écran d'introduction expliquant la méthode en 3 étapes (Phase 3)
+- **FR43:** Le système affiche un résumé dynamique de l'analyse en cours mis à jour en temps réel
+- **FR44:** Le système présente un écran d'introduction expliquant la méthode en 3 étapes
 
 ## Non-Functional Requirements
 
@@ -506,7 +495,7 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 | **NFR4** | Génération du rapport bi-couche (rendu HTML) | < 500ms |
 | **NFR5** | Export PDF complet | < 5s pour un rapport de 3-4 pages |
 | **NFR6** | Sauvegarde localStorage | < 100ms (non bloquant) |
-| **NFR7** | Synchronisation Google Sheets | < 3s par opération (Phase 2) |
+| **NFR7** | Synchronisation Google Sheets | < 3s par opération |
 
 ### Security
 
