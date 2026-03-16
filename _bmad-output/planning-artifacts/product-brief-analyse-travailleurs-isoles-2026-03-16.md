@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2]
+stepsCompleted: [1, 2, 3]
 inputDocuments:
   - docs/cahier-des-charges.md
   - docs/specification-logique-analyse.md
@@ -55,3 +55,37 @@ Chaque niveau produit une décision claire et peut arrêter l'analyse avec un mo
 - **Vulgarisation intelligente** : questionnaires intermédiaires qui calculent les codes techniques (probabilité, charge cognitive) à partir de questions en langage naturel
 - **Autonomie totale** : aucun backend, données chez le client (Google Sheets), déploiement statique, zéro dépendance
 - **Outil de présentation** : résultats en deux couches (langage naturel pour le management + détail technique pour les spécialistes)
+
+---
+
+## Utilisateurs cibles
+
+### Utilisateurs primaires
+
+**Persona : Marc, 47 ans — Spécialiste STPS / Consultant SST**
+
+- **Contexte** : Travaille comme chargé de sécurité interne ou consultant SST externe pour des PME/PMI industrielles suisses. Connaît bien l'OPA et la documentation SUVA. Le même profil qu'il soit interne à une entreprise ou consultant externe.
+- **Frustration actuelle** : Dispose de la doc SUVA 44094.F mais aucun outil ne l'aide à formaliser les valeurs limites (délais de secours, couverture réseau, moyens de surveillance, variation par tâche et non par poste). Chaque analyse est un exercice artisanal, difficilement reproductible et peu défendable face au management. Aucun système clair et complet ne fournit une aide décisionnelle basée sur des éléments mesurables et explicites.
+- **Besoin clé** : Un outil qui transforme la méthode SUVA en décisions explicites, traçables et présentables — pas un formulaire à remplir, mais un système qui calcule, décide et justifie.
+- **Moment "aha!"** : Quand le rapport produit une conclusion claire par période avec les mesures concrètes à mettre en place, et que le cadre comprend sans poser de questions.
+
+### Utilisateurs secondaires (destinataires du rapport)
+
+**Persona : Sandra, 52 ans — Responsable d'exploitation / Cadre**
+
+- **Contexte** : Gère une équipe avec des postes isolés. N'a jamais lu la doc SUVA. Pour elle, le travailleur isolé c'est "quelqu'un qui travaille seul" sans plus de nuance.
+- **Frustration actuelle** : Le spécialiste SST lui dit "il faut un PTI" ou "il faut réorganiser" mais elle ne comprend pas pourquoi, ni sur quelle base. Elle a l'impression qu'on exagère les contraintes sans fondement clair. La méthode d'évaluation est inconnue et très peu définie pour elle.
+- **Besoin clé** : Un document qui dit en langage clair : autorisé ou interdit, et voici exactement ce que vous devez mettre en place concrètement. Pas de codes, pas de zones — des actions.
+
+**Persona : Luca, 34 ans — Collaborateur terrain**
+
+- **Contexte** : Effectue des tâches en situation d'isolement. N'est pas impliqué dans l'analyse mais en subit les conséquences (équipement imposé, procédures modifiées).
+- **Besoin clé** : Comprendre pourquoi on lui impose tel équipement ou telle contrainte. Le rapport doit pouvoir lui être montré et être compréhensible.
+
+### Parcours utilisateur
+
+- **Découverte** : Le spécialiste STPS découvre l'outil via recommandation professionnelle ou recherche liée à la SUVA 44094.F
+- **Onboarding** : Écran d'introduction en 3 étapes (définition travailleur isolé, vue d'ensemble des 4 niveaux, liste des informations à préparer)
+- **Usage principal** : Le spécialiste conduit l'analyse via le wizard guidé → produit un rapport
+- **Valeur délivrée** : Le rapport couche 1 (langage naturel) est envoyé au cadre / montré au collaborateur. Le spécialiste conserve la couche 2 (détail technique) pour son dossier de conformité
+- **Cycle** : Révision planifiée selon la date définie dans l'analyse, ou lors de changement de conditions (nouvelle tâche, nouvel équipement, modification des délais de secours)
