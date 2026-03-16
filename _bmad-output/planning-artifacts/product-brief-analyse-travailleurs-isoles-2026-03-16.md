@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3]
+stepsCompleted: [1, 2, 3, 4]
 inputDocuments:
   - docs/cahier-des-charges.md
   - docs/specification-logique-analyse.md
@@ -89,3 +89,34 @@ Chaque niveau produit une décision claire et peut arrêter l'analyse avec un mo
 - **Usage principal** : Le spécialiste conduit l'analyse via le wizard guidé → produit un rapport
 - **Valeur délivrée** : Le rapport couche 1 (langage naturel) est envoyé au cadre / montré au collaborateur. Le spécialiste conserve la couche 2 (détail technique) pour son dossier de conformité
 - **Cycle** : Révision planifiée selon la date définie dans l'analyse, ou lors de changement de conditions (nouvelle tâche, nouvel équipement, modification des délais de secours)
+
+---
+
+## Métriques de succès
+
+### Succès utilisateur
+
+| Métrique | Indicateur | Cible |
+|----------|-----------|-------|
+| **Temps par analyse** | Durée entre le début du wizard et le rapport finalisé | < 30 minutes pour une analyse complète (vs estimé 2-4h sur papier/Excel) |
+| **Qualité du rapport** | Analyse complète sans champ manquant ni incohérence détectée | 100% des analyses finalisées passent toutes les validations |
+| **Clarté de saisie** | L'utilisateur ne bloque jamais sur une question — les questionnaires intermédiaires et fourchettes suffisent | < 1 utilisation du bouton "Je ne sais pas" par analyse en moyenne |
+| **Acceptation par le cadre** | Le rapport couche 1 est compris et accepté sans reformulation nécessaire | Le spécialiste n'a pas besoin de "traduire" le rapport oralement |
+
+### Objectifs business
+
+| Objectif | Horizon | Indicateur |
+|----------|---------|-----------|
+| **Validation terrain** | 3 mois | Pierre-Alain utilise l'outil pour ses propres mandats et le préfère à sa méthode actuelle |
+| **Adoption pair-à-pair** | 6 mois | 4-5 collègues spécialistes STPS utilisent l'outil activement |
+| **Positionnement expert** | 12 mois | L'outil devient une référence citée dans le milieu SST suisse romand |
+| **Modèle économique** | À définir | Outil gratuit en phase 1 — monétisation à évaluer après validation terrain |
+
+### KPIs de qualité produit
+
+| KPI | Mesure | Cible |
+|-----|--------|-------|
+| **Taux de complétion** | % d'analyses démarrées qui arrivent au rapport final | > 80% |
+| **Fine-tuning utilisateur** | L'utilisateur peut ajuster les éléments configurables [CONFIG] et comprend ce qui est modifiable vs réglementaire [SUVA_CONST] | Distinction claire dans l'interface |
+| **Exactitude des calculs** | Résultats conformes à la matrice SUVA et aux formules de la spécification | 100% — zéro écart sur les constantes réglementaires |
+| **Image concrète** | Le rapport donne une vision claire et actionnable de la situation | Chaque analyse produit des mesures concrètes, pas des zones abstraites |
