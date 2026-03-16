@@ -11,6 +11,7 @@ stepsCompleted:
   - step-07-project-type
   - step-08-scoping
   - step-09-functional
+  - step-10-nonfunctional
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -540,3 +541,55 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 - **FR42:** Le système affiche une aide contextuelle sur chaque champ du wizard
 - **FR43:** Le système affiche un résumé dynamique de l'analyse en cours mis à jour en temps réel (Phase 2)
 - **FR44:** Le système présente un écran d'introduction expliquant la méthode en 3 étapes (Phase 3)
+
+## Non-Functional Requirements
+
+### Performance
+
+| NFR | Critère | Mesure |
+|-----|---------|--------|
+| **NFR1** | Chargement initial de l'application | < 2s sur connexion 4G (CDN statique) |
+| **NFR2** | Transition entre étapes du wizard | < 100ms (rendu côté client uniquement) |
+| **NFR3** | Recalcul matrice/t_max/zone après modification | < 50ms (instantané perçu) |
+| **NFR4** | Génération du rapport bi-couche (rendu HTML) | < 500ms |
+| **NFR5** | Export PDF complet | < 5s pour un rapport de 3-4 pages |
+| **NFR6** | Sauvegarde localStorage | < 100ms (non bloquant) |
+| **NFR7** | Synchronisation Google Sheets | < 3s par opération (Phase 2) |
+
+### Security
+
+| NFR | Critère | Mesure |
+|-----|---------|--------|
+| **NFR8** | Authentification Google | OAuth2 avec scope minimal (`spreadsheets` uniquement) — aucun accès au Drive, Gmail ou profil |
+| **NFR9** | Stockage local | Aucune donnée personnelle des travailleurs analysés dans localStorage — l'analyse porte sur le poste, pas sur la personne |
+| **NFR10** | Transmission des données | HTTPS obligatoire pour toutes les communications avec l'API Google Sheets |
+| **NFR11** | Token management | Les tokens OAuth2 ne sont jamais stockés en clair dans localStorage — utilisation de la session Google uniquement |
+| **NFR12** | Isolation des données | Chaque entreprise accède uniquement à son propre Google Sheet — aucune donnée croisée entre entreprises |
+
+### Accessibility
+
+| NFR | Critère | Mesure |
+|-----|---------|--------|
+| **NFR13** | Conformité WCAG | 2.1 niveau AA |
+| **NFR14** | Navigation clavier | 100% du wizard navigable au clavier (Tab, Enter, Escape) |
+| **NFR15** | Contraste couleurs | Ratio ≥ 4.5:1 pour tout texte, y compris les badges de zone Z1-Z4 |
+| **NFR16** | Labels ARIA | Tous les champs de formulaire, la matrice des risques et les badges de zone ont des labels ARIA |
+| **NFR17** | Focus visible | Outline de focus visible sur tous les éléments interactifs |
+
+### Integration
+
+| NFR | Critère | Mesure |
+|-----|---------|--------|
+| **NFR18** | Google Sheets API v4 | Respect du quota (100 requêtes/100s/utilisateur) — batch des écritures si nécessaire |
+| **NFR19** | Dégradation gracieuse | Si Google Sheets est indisponible, l'application reste 100% fonctionnelle en mode localStorage |
+| **NFR20** | Compatibilité export CSV | UTF-8 BOM + séparateur point-virgule pour compatibilité Excel Windows français |
+| **NFR21** | Compatibilité export PDF | Rendu correct des caractères accentués français et des tableaux de la matrice SUVA |
+
+### Reliability
+
+| NFR | Critère | Mesure |
+|-----|---------|--------|
+| **NFR22** | Zéro perte de données | Sauvegarde automatique localStorage toutes les 30s ou à chaque changement d'étape du wizard |
+| **NFR23** | Reprise après interruption | 100% des analyses en cours récupérables après fermeture de navigateur ou crash |
+| **NFR24** | Exactitude des calculs | 100% de conformité matrice SUVA — couvert par tests unitaires sur les 25 cellules + tous les cas limites de t_max |
+| **NFR25** | Disponibilité | 99.9% — hébergement statique CDN (Vercel/Cloudflare), aucune dépendance serveur pour le fonctionnement de base |
