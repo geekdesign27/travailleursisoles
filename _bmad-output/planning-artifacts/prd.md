@@ -7,6 +7,7 @@ stepsCompleted:
   - step-03-success
   - step-04-journeys
   - step-05-domain
+  - step-06-innovation
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -260,3 +261,43 @@ Marc hésite sur la gravité du dommage. Il revient à l'étape 5, modifie sa r�
 | **Confusion [SUVA_CONST] / [CONFIG]** | L'utilisateur modifie un élément réglementaire | Verrouillage technique + distinction visuelle + message explicatif |
 | **Évolution de la norme SUVA** | Édition future de la 44094.F avec modifications | Architecture permettant la mise à jour des constantes via fichier de configuration versionné (mais pas modifiable par l'utilisateur) |
 | **Couverture réseau terrain** | Impossibilité de synchroniser Google Sheets sur site | localStorage comme couche de persistance primaire, synchronisation différée |
+
+## Innovation & Novel Patterns
+
+### Detected Innovation Areas
+
+**1. Création de catégorie — Premier outil digital conforme SUVA 44094.F**
+Il ne s'agit pas d'améliorer un outil existant mais de digitaliser une méthode réglementaire qui n'a jamais eu d'équivalent numérique. Aucun concurrent direct n'existe dans le marché suisse des PME/PMI.
+
+**2. Surcouche opérationnelle sur une norme réglementaire**
+L'innovation clé est d'aller au-delà de ce que la méthode SUVA couvre en ajoutant des dimensions opérationnelles concrètes : charge cognitive (C1-C3), matrice de fiabilité des outils d'alerte, décision différenciée par période. La norme fournit le cadre ; l'outil fournit l'intelligence opérationnelle qui manque.
+
+**3. Vulgarisation computationnelle**
+Les questionnaires intermédiaires en langage naturel qui calculent les codes techniques en coulisses (probabilité, charge cognitive) représentent un pattern de "computation invisible" — l'utilisateur répond à des questions simples, l'algorithme produit les valeurs réglementaires. Ce pattern est transposable à d'autres domaines réglementaires.
+
+**4. Unité d'analyse TÂCHE × PÉRIODE**
+Rompre avec l'analyse par poste de travail pour analyser par combinaison tâche × période est un changement conceptuel significatif qui reflète mieux la réalité terrain.
+
+### Market Context & Competitive Landscape
+
+- **Aucun concurrent direct** dans le marché suisse des outils conformes SUVA 44094.F
+- **Alternatives indirectes** : formulaires papier SUVA, fichiers Excel non structurés, logiciels SST génériques (qui ne couvrent pas la logique à 4 niveaux)
+- **Barrière d'entrée** : expertise métier SST + connaissance approfondie de la méthode SUVA + compréhension des contraintes opérationnelles terrain. Cette combinaison de savoirs est le différenciateur défensif.
+
+### Validation Approach
+
+| Innovation | Méthode de validation | Critère de succès |
+|-----------|----------------------|-------------------|
+| Outil digital conforme | Pierre-Alain utilise l'outil pour ses mandats réels | Préféré à la méthode manuelle actuelle en < 3 mois |
+| Surcouche opérationnelle | Retour terrain des 4-5 premiers spécialistes STPS | Les dimensions supplémentaires (charge cognitive, fiabilité outil) sont jugées pertinentes et utilisées |
+| Vulgarisation computationnelle | Test utilisateur : un spécialiste complète une analyse sans aide | Aucun blocage sur les questionnaires intermédiaires |
+| Unité TÂCHE × PÉRIODE | Comparaison avec analyses existantes | Les résultats par période révèlent des différences significatives que l'analyse par poste masquait |
+
+### Risk Mitigation
+
+| Risque innovation | Fallback |
+|-------------------|----------|
+| Les spécialistes STPS préfèrent leur méthode manuelle | UX de qualité exceptionnelle + gain de temps démontrable (×4) pour forcer l'adoption |
+| La surcouche opérationnelle est jugée non pertinente | Les dimensions [CONFIG] sont désactivables — le cœur SUVA reste fonctionnel seul |
+| La vulgarisation produit des valeurs incorrectes | Mode expert permettant la saisie directe des codes techniques (bypass des questionnaires intermédiaires) |
+| L'unité TÂCHE × PÉRIODE complexifie trop | Option de regroupement par poste dans le dashboard pour simplifier la vue consolidée |
