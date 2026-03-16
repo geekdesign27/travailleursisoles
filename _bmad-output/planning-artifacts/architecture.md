@@ -6,12 +6,17 @@ stepsCompleted:
   - step-04-decisions
   - step-05-patterns
   - step-06-structure
+  - step-07-validation
+  - step-08-complete
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
   - docs/specification-logique-analyse.md
 workflowType: 'architecture'
+lastStep: 8
+status: 'complete'
+completedAt: '2026-03-16'
 project_name: 'Analyse Travailleurs Isolés - SUVA 44094.F'
 user_name: 'Pierre-Alain'
 date: '2026-03-16'
@@ -176,6 +181,19 @@ localStorage (primaire) → Queue de modifications → Batch sync → Google She
 | **State management** | React Context + useReducer | Suffisant pour une SPA sans temps réel serveur. Un contexte pour l'analyse en cours, un pour la config entreprise |
 | **Formulaires** | React Hook Form + `@hookform/resolvers/zod` | Wizard multi-step avec validation conditionnelle, renders optimisés, intégration Zod native |
 | **Routing** | React Router v7 | 7 routes principales (M1-M7), pas de data loading serveur, simple et éprouvé |
+
+**Table de routage :**
+
+| Route | Module | Composant | Description |
+|-------|--------|-----------|-------------|
+| `/` | M1 | `DashboardPage` | Liste consolidée des analyses, filtres, alertes révision |
+| `/analysis/new` | M2 | `WizardPage` | Nouvelle analyse — wizard 4 niveaux |
+| `/analysis/:id` | M2 | `WizardPage` | Reprise/édition d'une analyse existante |
+| `/analysis/:id/report` | M3 | `ReportPage` | Rapport bi-couche (langage naturel + technique) |
+| `/analysis/:id/export` | M4 | `ReportPage` | Export PDF/CSV (sous-vue du rapport) |
+| `/config` | M5 | `ConfigPage` | Configuration entreprise, taxonomies, Google Sheets |
+| `/onboarding` | M6 | `OnboardingScreen` | Écran d'accueil 3 étapes (première visite) |
+| `/help` | M7 | — | Aide contextuelle (intégrée dans chaque page via tooltips) |
 | **Composants UI** | Shadcn UI (copiés dans le projet) + composants métier custom | Composants de base (Button, Card, Dialog, Badge, Tooltip) via Shadcn. Composants métier (RiskMatrix, ZoneBadge, WizardStep) custom |
 | **Bundle optimization** | Code splitting par route (React.lazy), tree-shaking Vite 8 | NFR1 — bundle < 200KB gzip |
 
@@ -531,4 +549,133 @@ Utilisateur (wizard) → React Hook Form → Zod validation → AnalysisContext 
 | Google Identity Services | OAuth2 login | `/features/config/GoogleSheetsConnect.tsx` |
 | Google Sheets API v4 | CRUD analyses + config | `/features/persistence/sheetsService.ts` |
 | jsPDF + html2canvas | Génération PDF client | `/features/report/PdfExporter.tsx` |
+
+## Architecture Validation Results
+
+### Coherence Validation ✅
+
+**Decision Compatibility:**
+Toutes les technologies sélectionnées sont compatibles entre elles : React 19 + Vite 8 (Rolldown) + TailwindCSS v4 (CSS-first) + Shadcn UI v4 (Radix UI 1.4.3) + Zod + React Hook Form + React Router v7. Aucun conflit de versions détecté. Le passage de React 18 (PRD) à React 19 (écosystème courant) est documenté et ne pose aucun problème de compatibilité.
+
+**Pattern Consistency:**
+Les conventions de nommage sont cohérentes : PascalCase pour composants, camelCase pour fonctions/hooks, SCREAMING_SNAKE_CASE pour constantes réglementaires. Le format d'actions `DOMAIN/ACTION` est appliqué uniformément. Les patterns de validation (Zod → RHF → UI) et de persistance (localStorage → syncQueue → Sheets) sont alignés.
+
+**Structure Alignment:**
+L'organisation par feature (`/features/{wizard,engine,report,persistence,config,dashboard,help}/`) reflète exactement les domaines fonctionnels du PRD. Les frontières architecturales (moteur ↔ UI, persistance ↔ métier, constantes ↔ config) sont clairement définies et respectées dans la structure de fichiers.
+
+### Requirements Coverage Validation ✅
+
+**Functional Requirements Coverage (44/44) :**
+
+| Domaine | FRs | Couverture |
+|---------|-----|------------|
+| Wizard 4 niveaux | FR1-FR18 | ✅ 13 composants Step + hooks + engine |
+| Rapport et exports | FR19-FR24 | ✅ ReportPage + PdfExporter + CsvExporter |
+| Conformité réglementaire | FR25-FR28 | ✅ `/constants/` + `/features/engine/` + `<RegulatoryLock />` |
+| Persistance et données | FR29-FR34 | ✅ localStorage + syncQueue + sheetsService |
+| Configuration entreprise | FR35-FR38 | ✅ ConfigPage + TaxonomyEditor + GoogleSheetsConnect |
+| Dashboard et guidage | FR39-FR44 | ✅ DashboardPage + OnboardingScreen + contextualHelp |
+
+**Non-Functional Requirements Coverage (25/25) :**
+
+| Catégorie | Couverture | Notes |
+|-----------|------------|-------|
+| Performance NFR1-7 | ✅ | Code splitting, recalcul synchrone < 50ms, bundle target < 200KB |
+| Sécurité NFR8-12 | ✅ | OAuth2 scope minimal, tokens non stockés, isolation par entreprise |
+| Accessibilité NFR13-17 | ⚠️ | Shadcn/Radix fournit l'a11y de base (ARIA, clavier). Recommandation : ajouter `@axe-core/playwright` dans les tests e2e pour NFR13/NFR15 |
+| Intégration NFR18-21 | ✅ | Queue-based sync, quota respecté, dégradation gracieuse |
+| Fiabilité NFR22-25 | ✅ | Sauvegarde auto 30s, zéro perte de données, CDN 99.9% |
+
+### Implementation Readiness Validation ✅
+
+**Decision Completeness:**
+Toutes les décisions critiques sont documentées avec versions exactes vérifiées (mars 2026). La séquence d'implémentation en 8 étapes définit les dépendances croisées. Aucune décision différée — V1 complète.
+
+**Structure Completeness:**
+Structure de projet complète avec ~80+ fichiers mappés. Chaque FR est associée à un ou plusieurs fichiers dans la structure. Table de routage explicite (7 routes → composants). Points d'intégration externe documentés (Google Identity, Google Sheets API, jsPDF).
+
+**Pattern Completeness:**
+Conventions de nommage couvrent fichiers, code TS, composants React. Patterns de state management, error handling, loading states, validation, et données format (interne/Sheets/localStorage) tous spécifiés. Guidelines d'enforcement et anti-patterns documentés pour les agents IA.
+
+### Gap Analysis Results
+
+**Lacunes critiques :** Aucune.
+
+**Lacunes mineures identifiées et résolues :**
+
+| # | Lacune | Résolution |
+|---|--------|------------|
+| 1 | Pas de table de routage explicite | ✅ Ajoutée dans "Frontend Architecture" — 7 routes mappées aux modules et composants |
+| 2 | Transition localStorage-only → mode connecté Google Sheets | Reportée au UX Design — concerne le flow d'interaction utilisateur, pas l'architecture technique |
+| 3 | Mécanisme de duplication multi-période (FR2) | Reporté aux Epics — détail d'implémentation de la story FR2 |
+
+**Avertissement accessibilité :**
+- NFR13/NFR15 : les composants Radix UI (via Shadcn) fournissent les attributs ARIA et la navigation clavier par défaut. Recommandation : intégrer `@axe-core/playwright` dans les tests e2e pour automatiser les audits WCAG 2.1 AA. À spécifier dans les epics de test.
+
+### Architecture Completeness Checklist
+
+**✅ Requirements Analysis**
+
+- [x] Contexte projet analysé en profondeur (SUVA 44094.F, 4 niveaux, 7 règles)
+- [x] Échelle et complexité évaluées (~80 colonnes, 14 travaux réglementés, multi-période)
+- [x] Contraintes techniques identifiées (zéro backend, Google Sheets, offline-first)
+- [x] 5 concerns transversaux mappés (exactitude réglementaire, SUVA_CONST/CONFIG, persistance duale, multi-période, vulgarisation)
+
+**✅ Architectural Decisions**
+
+- [x] Décisions critiques documentées avec versions exactes (mars 2026)
+- [x] Stack technique complète (React 19, Vite 8, Tailwind v4, Shadcn v4, Zod, RHF, React Router v7)
+- [x] Patterns d'intégration définis (Google Sheets sync queue, OAuth2)
+- [x] Performance adressée (code splitting, recalcul < 50ms, bundle < 200KB)
+
+**✅ Implementation Patterns**
+
+- [x] Conventions de nommage complètes (fichiers, code, composants, actions)
+- [x] Patterns de structure par feature
+- [x] Patterns de communication (Context + useReducer, actions DOMAIN/ACTION)
+- [x] Patterns de process (error handling, loading, validation)
+
+**✅ Project Structure**
+
+- [x] Structure de répertoire complète (~80+ fichiers)
+- [x] Frontières de composants établies (engine ↔ UI, persistance ↔ métier, constantes ↔ config)
+- [x] Points d'intégration mappés (Google Identity, Sheets API, jsPDF)
+- [x] Mapping complet FRs → structure de fichiers
+
+### Architecture Readiness Assessment
+
+**Overall Status:** PRÊT POUR L'IMPLÉMENTATION
+
+**Confidence Level:** Élevé — toutes les décisions prises, structure complète, patterns définis, 44/44 FRs et 25/25 NFRs couverts.
+
+**Points forts :**
+- Moteur de calcul réglementaire isolé (fonctions pures TypeScript) — testable indépendamment de l'UI
+- Source de vérité unique Zod → types TS + validation formulaire + validation sync
+- Architecture offline-first avec sync gracieuse — pas de dépendance réseau pour l'utilisation courante
+- Séparation nette SUVA_CONST / CONFIG au niveau données, UI, et persistance
+- Stack 100% vérifiée mars 2026 avec versions exactes
+
+**Points à affiner dans les phases suivantes :**
+- Tests d'accessibilité automatisés (`@axe-core/playwright`) → à spécifier dans les epics
+- Flow UX de transition localStorage → mode connecté → à détailler dans le UX Design
+- Mécanisme de duplication d'analyse multi-période → à détailler dans les epics FR2
+
+### Implementation Handoff
+
+**Directives pour les agents IA :**
+
+- Suivre **toutes** les décisions architecturales exactement telles que documentées
+- Utiliser les patterns d'implémentation de manière cohérente sur tous les composants
+- Respecter la structure de projet et les frontières entre features
+- Se référer à ce document pour toute question architecturale
+- Annoter `// SUVA_REGULATORY_CONSTANT` sur chaque constante réglementaire
+- Écrire un test unitaire pour chaque fonction du moteur de calcul
+
+**Première priorité d'implémentation :**
+```bash
+npx shadcn@latest init -t vite -n analyse-travailleurs-isoles
+cd analyse-travailleurs-isoles
+npx shadcn@latest add button card dialog badge tooltip tabs separator input select checkbox radio-group textarea progress skeleton form
+```
+Puis : créer le schéma Zod `analysis.schema.ts`, les constantes SUVA, et le moteur de calcul (fonctions pures + tests).
 
