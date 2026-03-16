@@ -94,6 +94,51 @@ export const Level2ResultSchema = z.object({
 
 export type Level2Result = z.infer<typeof Level2ResultSchema>;
 
+export const COUVERTURE_RESEAU = [
+  "bonne",
+  "moyenne",
+  "faible",
+  "aucune",
+] as const;
+
+export const CouvertureReseau = z.enum(COUVERTURE_RESEAU);
+export type CouvertureReseauType = z.infer<typeof CouvertureReseau>;
+
+export const OperationalConditionsSchema = z.object({
+  couvertureReseau: CouvertureReseau,
+  equipementDATI: z.string().max(200).default(""),
+  centraleAlarme: z.boolean(),
+  delaiSecouristesJour: z.number().min(0, "La valeur doit être >= 0"),
+  delaiSecouristesNuit: z.number().min(0, "La valeur doit être >= 0"),
+  delaiSecoursPublics: z.number().min(0, "La valeur doit être >= 0"),
+  delaiTypeBlessure: z.number().min(0, "La valeur doit être >= 0"),
+  tempsSauvetage: z.number().min(0, "La valeur doit être >= 0"),
+});
+
+export type OperationalConditions = z.infer<typeof OperationalConditionsSchema>;
+
+export const TmaxResultSchema = z.object({
+  tmax: z.number(),
+  feasible: z.boolean(),
+  reclassificationNeeded: z.boolean(),
+  newZone: z
+    .union([
+      z.literal(1),
+      z.literal(2),
+      z.literal("3a"),
+      z.literal("3b"),
+      z.literal(4),
+    ])
+    .optional(),
+});
+
+export const Level3ResultSchema = z.object({
+  operationalConditions: OperationalConditionsSchema,
+  tmaxResult: TmaxResultSchema,
+});
+
+export type Level3Result = z.infer<typeof Level3ResultSchema>;
+
 export const AnalysisSchema = z.object({
   id: z.string().uuid(),
   entreprise: z.string().min(1).max(100),
@@ -109,6 +154,7 @@ export const AnalysisSchema = z.object({
   currentLevel: z.number().min(0).max(4).default(0),
   level1Result: Level1ResultSchema.optional(),
   level2Result: Level2ResultSchema.optional(),
+  level3Result: Level3ResultSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
