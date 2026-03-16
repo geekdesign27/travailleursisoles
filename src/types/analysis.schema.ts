@@ -165,6 +165,31 @@ export const Level4ResultSchema = z.object({
 
 export type Level4Result = z.infer<typeof Level4ResultSchema>;
 
+export const EmergencyConceptSchema = z.object({
+  alerte: z.string().max(1000).default(""),
+  premierSecours: z.string().max(1000).default(""),
+  formation: z.string().max(1000).default(""),
+  accesSecours: z.string().max(1000).default(""),
+});
+
+export type EmergencyConcept = z.infer<typeof EmergencyConceptSchema>;
+
+export const TrainingDocSchema = z.object({
+  dateFormation: z.string().default(""),
+  formateur: z.string().max(200).default(""),
+  documentation: z.string().max(500).default(""),
+  dateRevision: z.string().default(""),
+});
+
+export type TrainingDoc = z.infer<typeof TrainingDocSchema>;
+
+export const DocumentationSchema = z.object({
+  emergencyConcept: EmergencyConceptSchema,
+  trainingDoc: TrainingDocSchema,
+});
+
+export type Documentation = z.infer<typeof DocumentationSchema>;
+
 export const AnalysisSchema = z.object({
   id: z.string().uuid(),
   entreprise: z.string().min(1).max(100),
@@ -182,6 +207,7 @@ export const AnalysisSchema = z.object({
   level2Result: Level2ResultSchema.optional(),
   level3Result: Level3ResultSchema.optional(),
   level4Result: Level4ResultSchema.optional(),
+  documentation: DocumentationSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

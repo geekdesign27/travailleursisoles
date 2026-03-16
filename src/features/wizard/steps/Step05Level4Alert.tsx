@@ -115,7 +115,7 @@ export function Step05Level4Alert() {
     });
 
     window.scrollTo({ top: 0, behavior: "smooth" });
-    navigate(`/analysis/${id}/report`);
+    navigate(`/analysis/${id}/level-5`);
   }, [
     state.current,
     validationResult,

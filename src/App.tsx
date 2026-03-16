@@ -9,6 +9,8 @@ import { Step02Level1Gate } from "@/features/wizard/steps/Step02Level1Gate";
 import { Step03Level2Risk } from "@/features/wizard/steps/Step03Level2Risk";
 import { Step04Level3Rescue } from "@/features/wizard/steps/Step04Level3Rescue";
 import { Step05Level4Alert } from "@/features/wizard/steps/Step05Level4Alert";
+import { Step06Documentation } from "@/features/wizard/steps/Step06Documentation";
+import { Step07Finalisation } from "@/features/wizard/steps/Step07Finalisation";
 
 function WizardNewAnalysis() {
   return (
@@ -50,6 +52,22 @@ function WizardLevel4() {
   );
 }
 
+function WizardDocumentation() {
+  return (
+    <WizardLayout sidebar={<WizardSidebar />}>
+      <Step06Documentation />
+    </WizardLayout>
+  );
+}
+
+function WizardFinalisation() {
+  return (
+    <WizardLayout sidebar={<WizardSidebar />}>
+      <Step07Finalisation />
+    </WizardLayout>
+  );
+}
+
 // Placeholder for future story pages
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -78,6 +96,14 @@ export default function App() {
             <Route path="/analysis/:id/level-2" element={<WizardLevel2 />} />
             <Route path="/analysis/:id/level-3" element={<WizardLevel3 />} />
             <Route path="/analysis/:id/level-4" element={<WizardLevel4 />} />
+            <Route
+              path="/analysis/:id/level-5"
+              element={<WizardDocumentation />}
+            />
+            <Route
+              path="/analysis/:id/finalisation"
+              element={<WizardFinalisation />}
+            />
             <Route
               path="/analysis/:id/level-:level"
               element={<PlaceholderPage title="Wizard — Niveau" />}
