@@ -6,6 +6,7 @@ stepsCompleted:
   - step-02c-executive-summary
   - step-03-success
   - step-04-journeys
+  - step-05-domain
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -194,3 +195,68 @@ Marc hésite sur la gravité du dommage. Il revient à l'étape 5, modifie sa r�
 | **Marc — Cas limite** | Sauvegarde/reprise localStorage, reclassement automatique, recalcul en temps réel, navigation arrière dans le wizard, analyses multiples par poste (TÂCHE × PÉRIODE) |
 | **Sandra — Rapport** | Rapport couche 1 en langage naturel, badges visuels de zone, distinction exigence réglementaire vs recommandation, actions concrètes numérotées, PDF professionnel |
 | **Marc admin — Configuration** | Connexion OAuth2 Google Sheets, configuration taxonomies, personnalisation libellés, verrouillage visuel [SUVA_CONST], création automatique des onglets Sheet, gestion multi-entreprises |
+
+## Domain-Specific Requirements
+
+### Compliance & Regulatory
+
+**Cadre légal suisse — références obligatoires :**
+
+| Norme | Portée | Impact sur l'application |
+|-------|--------|--------------------------|
+| **OPA art. 8 al. 1** (RS 832.30) | Obligation de surveillance du travailleur isolé en situation dangereuse | Fondement légal de l'outil — cité dans chaque rapport |
+| **SUVA 44094.F** (mai 2025) | Méthode d'analyse structurée : matrice 5×5, 4 zones, constantes réglementaires | Matrice, formules et gates codés en dur [SUVA_CONST] |
+| **OTConst** art. 81, 114, 118, 119 | Travaux de déconstruction, thermiques, cordes, conduites | Gate Niveau 1 — travaux réglementés → Zone 1 forcée |
+| **OIBT** RS 734.27 art. 22 | Travaux électriques BT sous tension | Gate Niveau 1 |
+| **CFST 2134.f** ch. 4.2.4 | Travaux forestiers dangereux | Gate Niveau 1 |
+| **Ordonnance protection jeunes travailleurs** | Personnel < 18 ans | Blocage absolu — Zone 1 obligatoire |
+| **OLT3** art. 26 | Conditions de travail | Contexte réglementaire général |
+
+**Règles de conformité non négociables :**
+
+- R1 — Travail réglementé = OUI → Zone 1 forcée (aucune exception)
+- R2 — Personnel < 18 ans → Zone 1 obligatoire
+- R3 — Zone 1 : surveillance ne remplace pas la présence d'une 2e personne
+- R4 — t_max ≤ 0 → Zone 3 impossible → reclassement Zone 2
+- R5 — Délai secours > 15 min en Zone 2 → avertissement ch. 7.2 SUVA
+- R6 — Matrice SUVA non modifiable par l'utilisateur
+- R7 — Tout rapport mentionne "SUVA 44094.F — Édition mai 2025"
+
+### Technical Constraints
+
+**Séparation [SUVA_CONST] / [CONFIG] :**
+- Les constantes réglementaires (matrice, formules, références légales, gates) sont codées en dur dans le code source, annotées `// SUVA_REGULATORY_CONSTANT`
+- Les éléments configurables (taxonomies, libellés, délais par entreprise) sont stockés dans Google Sheets et modifiables par l'utilisateur
+- L'interface distingue visuellement les deux catégories (éléments grisés/verrouillés vs éditables)
+
+**Intégrité des calculs :**
+- Matrice SUVA 5×5 : résultat exact pour chaque combinaison gravité (I-V) × probabilité (A-E)
+- Calcul t_max : `t_max = délai_type_blessure - temps_secouristes - temps_ambulance - temps_sauvetage`
+- Scores composites et algorithmes de reclassement conformes à la spécification logique
+- Aucune approximation ni arrondi non documenté
+
+**Persistance et confidentialité :**
+- Zéro backend propriétaire — les données restent chez le client (Google Sheets)
+- localStorage pour la sauvegarde brouillon (données sensibles SST sur le device de l'utilisateur)
+- OAuth2 Google avec scope limité au Sheet spécifique
+- Aucune donnée personnelle des travailleurs analysés n'est stockée (l'analyse porte sur le poste, pas sur la personne)
+
+### Integration Requirements
+
+| Système | Type d'intégration | Détails |
+|---------|-------------------|---------|
+| **Google Sheets API v4** | Lecture/écriture | 5 onglets : Analyses, Config, Taxonomies, Zones_Textes, Travailleurs_Reg |
+| **Google Identity Services** | OAuth2 | Authentification pour accès au Sheet du client |
+| **jsPDF + html2canvas** | Export client-side | Génération PDF bi-couche sans serveur |
+| **Blob API** | Export CSV | UTF-8 BOM pour compatibilité Excel Windows |
+
+### Risk Mitigations
+
+| Risque | Impact | Mitigation |
+|--------|--------|-----------|
+| **Erreur dans la matrice SUVA** | Décision réglementaire fausse → responsabilité légale | Tests unitaires exhaustifs sur les 25 cellules de la matrice + constantes codées en dur non modifiables |
+| **Calcul t_max incorrect** | Reclassement manqué → sous-estimation du risque | Tests de validation avec cas limites (t_max = 0, négatif, limite exacte) |
+| **Perte de données analyse** | Analyse perdue en cours de saisie | Double persistance : localStorage (automatique) + Google Sheets (synchronisation) |
+| **Confusion [SUVA_CONST] / [CONFIG]** | L'utilisateur modifie un élément réglementaire | Verrouillage technique + distinction visuelle + message explicatif |
+| **Évolution de la norme SUVA** | Édition future de la 44094.F avec modifications | Architecture permettant la mise à jour des constantes via fichier de configuration versionné (mais pas modifiable par l'utilisateur) |
+| **Couverture réseau terrain** | Impossibilité de synchroniser Google Sheets sur site | localStorage comme couche de persistance primaire, synchronisation différée |
