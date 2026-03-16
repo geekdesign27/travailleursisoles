@@ -44,6 +44,14 @@ export const AnalysisIdentificationSchema = z.object({
   frequence_activite: FrequenceActivite,
 });
 
+export const Level1ResultSchema = z.object({
+  blocked: z.boolean(),
+  checkedCategories: z.array(z.string()),
+  isMinor: z.boolean(),
+});
+
+export type Level1Result = z.infer<typeof Level1ResultSchema>;
+
 export const AnalysisSchema = z.object({
   id: z.string().uuid(),
   entreprise: z.string().min(1).max(100),
@@ -57,6 +65,7 @@ export const AnalysisSchema = z.object({
   status: AnalysisStatus.default("draft"),
   currentStep: z.number().default(1),
   currentLevel: z.number().min(0).max(4).default(0),
+  level1Result: Level1ResultSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

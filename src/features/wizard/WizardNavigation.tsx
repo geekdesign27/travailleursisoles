@@ -7,6 +7,7 @@ interface WizardNavigationProps {
   previousLabel?: string;
   isFirstStep?: boolean;
   isSubmitting?: boolean;
+  nextDisabled?: boolean;
 }
 
 export function WizardNavigation({
@@ -16,6 +17,7 @@ export function WizardNavigation({
   previousLabel = "Précédent",
   isFirstStep = false,
   isSubmitting = false,
+  nextDisabled = false,
 }: WizardNavigationProps) {
   return (
     <div className="flex justify-between pt-8">
@@ -35,7 +37,7 @@ export function WizardNavigation({
       <Button
         type="button"
         onClick={onNext}
-        disabled={isSubmitting}
+        disabled={isSubmitting || nextDisabled}
         className="min-h-[44px] min-w-[44px] bg-suva-primary text-white hover:bg-suva-primary-hover"
       >
         {isSubmitting ? "Validation..." : nextLabel}

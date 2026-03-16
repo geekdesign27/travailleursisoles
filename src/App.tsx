@@ -5,11 +5,20 @@ import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { WizardLayout } from "@/features/wizard/WizardLayout";
 import { WizardSidebar } from "@/features/wizard/WizardSidebar";
 import { Step01Identification } from "@/features/wizard/steps/Step01Identification";
+import { Step02Level1Gate } from "@/features/wizard/steps/Step02Level1Gate";
 
 function WizardNewAnalysis() {
   return (
     <WizardLayout sidebar={<WizardSidebar />}>
       <Step01Identification />
+    </WizardLayout>
+  );
+}
+
+function WizardLevel1() {
+  return (
+    <WizardLayout sidebar={<WizardSidebar />}>
+      <Step02Level1Gate />
     </WizardLayout>
   );
 }
@@ -38,6 +47,7 @@ export default function App() {
               path="/analysis/:id"
               element={<PlaceholderPage title="Résumé de l'analyse" />}
             />
+            <Route path="/analysis/:id/level-1" element={<WizardLevel1 />} />
             <Route
               path="/analysis/:id/level-:level"
               element={<PlaceholderPage title="Wizard — Niveau" />}
