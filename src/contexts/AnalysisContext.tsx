@@ -12,14 +12,17 @@ type AnalysisAction =
     }
   | { type: "analysis/SET_STEP"; payload: { step: number; level: number } }
   | { type: "analysis/LOAD"; payload: Analysis }
-  | { type: "analysis/RESET" };
+  | { type: "analysis/RESET" }
+  | { type: "analysis/MARK_SAVED" };
 
 interface AnalysisState {
   current: Analysis | null;
+  isDirty: boolean;
 }
 
 const initialState: AnalysisState = {
   current: null,
+  isDirty: false,
 };
 
 function analysisReducer(
@@ -28,7 +31,7 @@ function analysisReducer(
 ): AnalysisState {
   switch (action.type) {
     case "analysis/CREATE":
-      return { current: action.payload };
+      return { current: action.payload, isDirty: true };
 
     case "analysis/UPDATE_FIELD":
       if (!state.current) return state;
@@ -38,6 +41,7 @@ function analysisReducer(
           [action.payload.field]: action.payload.value,
           updatedAt: new Date().toISOString(),
         },
+        isDirty: true,
       };
 
     case "analysis/SET_STEP":
@@ -49,13 +53,17 @@ function analysisReducer(
           currentLevel: action.payload.level,
           updatedAt: new Date().toISOString(),
         },
+        isDirty: true,
       };
 
     case "analysis/LOAD":
-      return { current: action.payload };
+      return { current: action.payload, isDirty: false };
 
     case "analysis/RESET":
       return initialState;
+
+    case "analysis/MARK_SAVED":
+      return { ...state, isDirty: false };
 
     default:
       return state;

@@ -8,6 +8,7 @@ import {
   WizardSidebarTabletToggle,
   WizardSidebarMobileFab,
 } from "@/features/wizard/WizardSidebar";
+import { useAutoSave } from "@/features/persistence/useAutoSave";
 
 interface WizardLayoutProps {
   children: ReactNode;
@@ -20,6 +21,9 @@ export function WizardLayout({
   currentStep,
   onStepClick,
 }: WizardLayoutProps) {
+  // Auto-save analysis on timer and step change
+  useAutoSave();
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       {/* Wizard stepper — responsive */}
