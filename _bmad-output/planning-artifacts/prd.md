@@ -16,6 +16,10 @@ stepsCompleted:
   - step-12-complete
 workflowStatus: complete
 completedAt: 2026-03-16
+lastEdited: 2026-03-16
+editHistory:
+  - date: 2026-03-16
+    changes: "DaisyUI remplacé par Shadcn UI + palette Tailwind dans Executive Summary et Web App Requirements"
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -44,7 +48,7 @@ workflowType: 'prd'
 
 L'unité d'analyse est la combinaison **TÂCHE × PÉRIODE** — pas le poste de travail. Chaque combinaison traverse 4 niveaux séquentiels : gate réglementaire (14 questions GO/NO-GO), matrice des risques SUVA (gravité × probabilité → zone 1 à 4), faisabilité du sauvetage (calcul t_max par période), et validation de l'outil d'alerte. Chaque niveau peut stopper l'analyse avec un motif légal précis.
 
-L'application est sans backend propriétaire : les données sont stockées chez le client via Google Sheets, avec sauvegarde locale en localStorage. Stack technique : React 18, TypeScript, Vite, TailwindCSS, DaisyUI. Déploiement statique sur Vercel ou Cloudflare Pages.
+L'application est sans backend propriétaire : les données sont stockées chez le client via Google Sheets, avec sauvegarde locale en localStorage. Stack technique : React 18, TypeScript, Vite, TailwindCSS avec palette de couleurs Tailwind, Shadcn UI (composants basés sur Radix UI). Déploiement statique sur Vercel ou Cloudflare Pages.
 
 Utilisateurs cibles : les spécialistes STPS / consultants SST qui conduisent les analyses (utilisateurs primaires), les cadres et collaborateurs terrain qui reçoivent et appliquent les conclusions (destinataires du rapport).
 
@@ -274,7 +278,7 @@ Rompre avec l'analyse par poste de travail pour analyser par combinaison tâche 
 
 ### Project-Type Overview
 
-Application web monopage (SPA) déployée en statique, sans backend propriétaire. L'architecture client-side-only est un choix délibéré : zéro dépendance serveur, données chez le client, déploiement sur CDN. Le stack React 18 + TypeScript + Vite + TailwindCSS + DaisyUI est défini dans le cahier des charges.
+Application web monopage (SPA) déployée en statique, sans backend propriétaire. L'architecture client-side-only est un choix délibéré : zéro dépendance serveur, données chez le client, déploiement sur CDN. Stack : React 18 + TypeScript + Vite + TailwindCSS (palette de couleurs Tailwind) + Shadcn UI (composants React accessibles basés sur Radix UI primitives, copiés dans le projet et stylés via Tailwind).
 
 ### Technical Architecture Considerations
 
