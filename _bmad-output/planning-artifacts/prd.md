@@ -10,6 +10,7 @@ stepsCompleted:
   - step-06-innovation
   - step-07-project-type
   - step-08-scoping
+  - step-09-functional
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -472,3 +473,70 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 |--------|-----------|
 | Développeur solo = bus factor 1 | Code propre, TypeScript strict, tests unitaires sur le moteur de calcul |
 | Scope trop large pour une personne | Phases clairement découpées — Phase 1 livrable indépendamment |
+
+## Functional Requirements
+
+### Analyse guidée (Wizard)
+
+- **FR1:** Le spécialiste peut créer une nouvelle analyse en identifiant l'entreprise, le département, le responsable, le titre de l'activité, la description, le nombre de personnes, la période de travail et la fréquence d'activité isolée
+- **FR2:** Le spécialiste peut définir l'unité d'analyse comme une combinaison TÂCHE × PÉRIODE, avec la possibilité de créer plusieurs analyses pour un même poste
+- **FR3:** Le spécialiste peut répondre à une checklist de 14 catégories de travaux réglementés avec les références légales associées (Gate Niveau 1)
+- **FR4:** Le système stoppe l'analyse avec un motif légal précis si un travail réglementé est coché ou si le personnel est mineur (Gate NO-GO)
+- **FR5:** Le spécialiste peut évaluer la gravité du dommage (I à V) via des questions intermédiaires en langage naturel sans manipuler les codes techniques
+- **FR6:** Le spécialiste peut évaluer la probabilité d'accident (A à E) via des questions intermédiaires en langage naturel sans manipuler les codes techniques
+- **FR7:** Le système calcule la zone de risque (1 à 4) à partir de la matrice SUVA 5×5 (Gate Niveau 2)
+- **FR8:** Le spécialiste peut vérifier les aptitudes du travailleur selon 3 dimensions : psychique, physique, intellectuelle
+- **FR9:** Le spécialiste peut décrire le danger principal identifié avec des aides contextuelles
+- **FR10:** Le spécialiste peut saisir les conditions opérationnelles : couverture réseau, équipements DATI, centrale d'alarme, délais de secouristes (jour/nuit), délais secours publics
+- **FR11:** Le système calcule le t_max par période et détermine la faisabilité du sauvetage (Gate Niveau 3)
+- **FR12:** Le système reclasse automatiquement en Zone 2 si t_max ≤ 0 pour une période donnée
+- **FR13:** Le spécialiste peut valider l'outil d'alerte en fonction de la compatibilité zone × équipement × couverture × charge cognitive (Gate Niveau 4)
+- **FR14:** Le spécialiste peut évaluer la charge cognitive de la tâche (C1-C3) via des questions en langage naturel
+- **FR15:** Le spécialiste peut documenter le concept d'urgence selon les 4 composantes SUVA : alerte, premiers secours, formation, accès des secours
+- **FR16:** Le spécialiste peut documenter la formation et la validation (date, formateur, documentation, date de révision)
+- **FR17:** Le spécialiste peut naviguer librement entre les étapes du wizard (retour arrière, modification)
+- **FR18:** Le système recalcule les résultats en temps réel lorsque le spécialiste modifie une valeur
+
+### Rapport et exports
+
+- **FR19:** Le système génère un rapport bi-couche : couche 1 en langage naturel (décisions, actions concrètes) et couche 2 en détail technique (scores, matrices, références légales)
+- **FR20:** Le spécialiste peut exporter le rapport en PDF professionnel
+- **FR21:** Le spécialiste peut exporter les données d'analyse en CSV compatible Excel Windows
+- **FR22:** Le rapport distingue visuellement les exigences réglementaires des recommandations opérationnelles
+- **FR23:** Le rapport affiche la zone de risque avec un badge coloré et les mesures de surveillance correspondantes
+- **FR24:** Le rapport mentionne systématiquement la référence "SUVA 44094.F — Édition mai 2025"
+
+### Conformité réglementaire
+
+- **FR25:** Le système implémente la matrice SUVA 5×5 exacte comme constante non modifiable
+- **FR26:** Le système applique les 7 règles de conformité non négociables (R1 à R7) sans exception
+- **FR27:** Le système distingue visuellement les éléments [SUVA_CONST] (verrouillés, non modifiables) des éléments [CONFIG] (paramétrables)
+- **FR28:** Le système affiche les références légales exactes à chaque étape pertinente du wizard
+
+### Persistance et données
+
+- **FR29:** Le système sauvegarde automatiquement l'analyse en cours dans le localStorage du navigateur
+- **FR30:** Le spécialiste peut reprendre une analyse interrompue depuis le localStorage
+- **FR31:** Le spécialiste peut connecter un Google Sheet d'entreprise via OAuth2 (Phase 2)
+- **FR32:** Le système synchronise les analyses avec le Google Sheet connecté (Phase 2)
+- **FR33:** Le système crée automatiquement la structure d'onglets dans le Google Sheet au premier accès (Phase 2)
+- **FR34:** Le système fonctionne en mode hors-ligne avec localStorage seul si Google Sheets n'est pas disponible
+
+### Configuration entreprise
+
+- **FR35:** Le spécialiste peut configurer les départements et services de l'entreprise (Phase 2)
+- **FR36:** Le spécialiste peut configurer la liste des équipements DATI disponibles (Phase 2)
+- **FR37:** Le spécialiste peut personnaliser les libellés des taxonomies configurables [CONFIG] (Phase 3)
+- **FR38:** Le spécialiste ne peut pas modifier les constantes réglementaires [SUVA_CONST]
+
+### Dashboard et consolidation
+
+- **FR39:** Le spécialiste peut consulter la liste de toutes les analyses sauvegardées avec leur statut et leur zone (Phase 3)
+- **FR40:** Le spécialiste peut filtrer et rechercher des analyses par entreprise, département, zone, statut (Phase 3)
+- **FR41:** Le système signale les analyses dont la date de révision est dépassée (Phase 3)
+
+### Guidage et aide contextuelle
+
+- **FR42:** Le système affiche une aide contextuelle sur chaque champ du wizard
+- **FR43:** Le système affiche un résumé dynamique de l'analyse en cours mis à jour en temps réel (Phase 2)
+- **FR44:** Le système présente un écran d'introduction expliquant la méthode en 3 étapes (Phase 3)
