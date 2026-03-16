@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Directions — Analyse Travailleurs Isolés</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #E36C09;
+    --primary-hover: #C45A07;
+    --bg: #FFFFFF;
+    --bg-secondary: #F8FAFC;
+    --text: #1E293B;
+    --text-secondary: #64748B;
+    --border: #E2E8F0;
+    --zone1: #C00000;
+    --zone2: #FF8C00;
+    --zone3: #FFC000;
+    --zone4: #70AD47;
+    --success: #16A34A;
+    --info: #2563EB;
+    --error: #DC2626;
+    --warning: #D97706;
+    --suva-const: #94A3B8;
+    --radius: 0.5rem;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; color: var(--text); background: #0F172A; }
+
+  /* Navigation */
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #1E293B; padding: 12px 24px; display: flex; align-items: center; gap: 12px; overflow-x: auto; }
+  .nav h1 { color: white; font-size: 14px; font-weight: 600; white-space: nowrap; margin-right: 12px; }
+  .nav-btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #475569; background: transparent; color: #CBD5E1; font-size: 13px; font-family: inherit; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .nav-btn:hover, .nav-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+  /* Sections */
+  .direction { display: none; min-height: 100vh; padding-top: 56px; background: var(--bg); }
+  .direction.active { display: block; }
+
+  .direction-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 32px 48px; }
+  .direction-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .direction-header p { color: var(--text-secondary); font-size: 15px; max-width: 720px; line-height: 1.6; }
+  .direction-header .tags { display: flex; gap: 8px; margin-top: 12px; }
+  .direction-header .tag { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 500; background: white; border: 1px solid var(--border); }
+
+  /* Mockup container */
+  .mockup { padding: 32px 48px; }
+  .mockup-frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); background: white; }
+
+  /* === DIRECTION A: Classic Wizard + Sidebar === */
+  .d-a-layout { display: grid; grid-template-columns: 1fr 360px; min-height: 600px; }
+  .d-a-main { padding: 32px; }
+  .d-a-sidebar { background: var(--bg-secondary); border-left: 1px solid var(--border); padding: 24px; }
+
+  /* App header */
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid var(--border); background: white; }
+  .app-logo { display: flex; align-items: center; gap: 10px; }
+  .app-logo-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
+  .app-logo-text { font-weight: 600; font-size: 15px; }
+  .app-nav { display: flex; gap: 4px; }
+  .app-nav a { padding: 6px 14px; border-radius: 6px; font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: all 0.15s; }
+  .app-nav a:hover { background: var(--bg-secondary); color: var(--text); }
+  .app-nav a.active { background: #FFF3E6; color: var(--primary); font-weight: 500; }
+
+  /* Stepper */
+  .stepper { display: flex; gap: 0; margin-bottom: 32px; }
+  .stepper-item { flex: 1; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 2px solid var(--border); font-size: 13px; color: var(--text-secondary); transition: all 0.15s; cursor: pointer; }
+  .stepper-item.completed { border-color: var(--success); color: var(--success); }
+  .stepper-item.active { border-color: var(--primary); color: var(--primary); font-weight: 500; }
+  .stepper-item.blocked { border-color: var(--zone1); color: var(--zone1); }
+  .stepper-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .stepper-item.completed .stepper-dot { background: var(--success); color: white; border-color: var(--success); }
+  .stepper-item.active .stepper-dot { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* Form elements */
+  .form-group { margin-bottom: 24px; }
+  .form-label { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .form-label .help-icon { width: 16px; height: 16px; border-radius: 50%; background: var(--info); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: help; }
+  .form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; font-family: inherit; transition: border-color 0.15s; }
+  .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(227,108,9,0.1); }
+  .form-select { appearance: none; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center; padding-right: 36px; }
+  .form-textarea { min-height: 80px; resize: vertical; }
+  .form-hint { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* Checkbox/Radio */
+  .check-group { display: flex; flex-direction: column; gap: 10px; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all 0.15s; }
+  .check-item:hover { border-color: var(--primary); background: #FFF8F0; }
+  .check-item.checked { border-color: var(--zone1); background: #FFF5F5; }
+  .check-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+  .check-item.checked .check-box { background: var(--zone1); border-color: var(--zone1); }
+  .check-label { font-size: 14px; line-height: 1.4; }
+  .check-ref { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Sidebar components */
+  .sidebar-section { margin-bottom: 20px; }
+  .sidebar-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 10px; }
+  .sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
+  .sidebar-item .label { color: var(--text-secondary); }
+  .sidebar-item .value { font-weight: 500; }
+
+  /* Zone badge */
+  .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .zone-badge.z1 { background: var(--zone1); color: white; }
+  .zone-badge.z2 { background: #FFF3E0; color: #9A3412; border: 1px solid var(--zone2); }
+  .zone-badge.z3 { background: #FFFBEB; color: #92400E; border: 1px solid var(--zone3); }
+  .zone-badge.z4 { background: #F0FDF4; color: #166534; border: 1px solid var(--zone4); }
+  .zone-badge-lg { padding: 8px 20px; font-size: 14px; }
+
+  /* Progress bar */
+  .progress-bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 16px; }
+  .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.3s; }
+
+  /* Gate alert */
+  .gate-alert { padding: 16px 20px; border-radius: var(--radius); border-left: 4px solid; margin-bottom: 24px; }
+  .gate-alert.nogo { border-color: var(--zone1); background: #FEF2F2; }
+  .gate-alert.warning { border-color: var(--warning); background: #FFFBEB; }
+  .gate-alert.info { border-color: var(--info); background: #EFF6FF; }
+  .gate-alert .gate-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .gate-alert .gate-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .gate-alert .gate-ref { font-size: 11px; color: var(--text-secondary); font-style: italic; margin-top: 6px; }
+
+  /* Buttons */
+  .btn { padding: 10px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-secondary { background: white; color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg-secondary); }
+  .btn-group { display: flex; gap: 12px; margin-top: 32px; }
+
+  /* Lock icon for SUVA_CONST */
+  .lock-icon { display: inline-flex; align-items: center; gap: 4px; color: var(--suva-const); font-size: 11px; }
+
+  /* Matrix */
+  .matrix { border-collapse: collapse; font-size: 12px; width: 100%; }
+  .matrix th, .matrix td { padding: 8px; text-align: center; border: 1px solid var(--border); }
+  .matrix th { background: var(--bg-secondary); font-weight: 600; font-size: 11px; }
+  .matrix .cell-z1 { background: #FEE2E2; color: var(--zone1); font-weight: 600; }
+  .matrix .cell-z2 { background: #FFF7ED; color: #9A3412; font-weight: 600; }
+  .matrix .cell-z3a { background: #FFFBEB; color: #92400E; font-weight: 500; }
+  .matrix .cell-z3b { background: #FEF9C3; color: #854D0E; font-weight: 500; }
+  .matrix .cell-z4 { background: #F0FDF4; color: #166534; }
+  .matrix .cell-active { outline: 3px solid var(--primary); outline-offset: -1px; box-shadow: 0 0 0 1px var(--primary); }
+
+  /* Cards (dashboard) */
+  .analysis-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: all 0.15s; cursor: pointer; }
+  .analysis-card:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .analysis-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .analysis-card-title { font-weight: 600; font-size: 14px; }
+  .analysis-card-meta { font-size: 12px; color: var(--text-secondary); }
+  .analysis-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+
+  /* Report preview */
+  .report-preview { padding: 32px; max-width: 720px; margin: 0 auto; }
+  .report-header { text-align: center; padding-bottom: 24px; border-bottom: 2px solid var(--primary); margin-bottom: 24px; }
+  .report-header h3 { font-size: 20px; margin-bottom: 4px; }
+  .report-header .report-subtitle { color: var(--text-secondary); font-size: 13px; }
+  .report-section { margin-bottom: 24px; }
+  .report-section h4 { font-size: 15px; font-weight: 600; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .report-action { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; }
+  .report-action-num { width: 24px; height: 24px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .report-action-text { font-size: 14px; line-height: 1.5; }
+  .report-badge-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .report-req-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .report-req-badge.legal { background: #FEE2E2; color: var(--zone1); }
+  .report-req-badge.reco { background: #DBEAFE; color: var(--info); }
+
+  /* Direction B: Vertical stepper */
+  .d-b-layout { display: grid; grid-template-columns: 240px 1fr 340px; min-height: 600px; }
+  .d-b-stepper { background: var(--bg-secondary); border-right: 1px solid var(--border); padding: 20px; }
+  .d-b-main { padding: 32px; }
+  .d-b-sidebar { background: var(--bg-secondary); border-left: 1px solid var(--border); padding: 24px; }
+  .v-stepper { display: flex; flex-direction: column; gap: 4px; }
+  .v-step { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+  .v-step:hover { background: white; }
+  .v-step.active { background: white; color: var(--primary); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .v-step.completed { color: var(--success); }
+  .v-step.blocked { color: var(--zone1); }
+  .v-step-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .v-step-level { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 8px 12px 4px; }
+
+  /* Direction D: Card-based wizard */
+  .d-d-layout { min-height: 600px; padding: 32px; background: var(--bg-secondary); }
+  .d-d-center { max-width: 640px; margin: 0 auto; }
+  .d-d-card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .d-d-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .d-d-progress-text { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+  .d-d-mini-sidebar { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); position: sticky; top: 80px; }
+
+  /* Direction E: Full-width single column */
+  .d-e-layout { min-height: 600px; }
+  .d-e-hero { background: linear-gradient(135deg, #1E293B 0%, #334155 100%); color: white; padding: 40px 48px; }
+  .d-e-hero h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .d-e-hero p { color: #94A3B8; font-size: 15px; }
+  .d-e-content { max-width: 800px; margin: 0 auto; padding: 32px 48px; }
+  .d-e-floating-summary { position: fixed; bottom: 24px; right: 24px; background: white; border-radius: 12px; padding: 16px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); border: 1px solid var(--border); width: 300px; z-index: 10; }
+
+  /* Comparison view */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 32px 48px; }
+  .compare-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .compare-card-header { padding: 16px 20px; background: var(--bg-secondary); font-weight: 600; font-size: 14px; border-bottom: 1px solid var(--border); }
+
+  /* Tabs for report */
+  .tab-bar { display: flex; border-bottom: 1px solid var(--border); }
+  .tab-item { padding: 10px 20px; font-size: 14px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab-item.active { color: var(--primary); border-color: var(--primary); font-weight: 500; }
+
+  /* Onboarding */
+  .onboard-card { text-align: center; max-width: 560px; margin: 0 auto; padding: 48px 32px; }
+  .onboard-icon { width: 64px; height: 64px; border-radius: 16px; background: #FFF3E6; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px; }
+  .onboard-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  .onboard-text { color: var(--text-secondary); font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+  .onboard-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
+  .onboard-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+  .onboard-dot.active { background: var(--primary); width: 24px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <h1>Directions UX</h1>
+  <button class="nav-btn active" onclick="show('a')">A. Wizard + Sidebar</button>
+  <button class="nav-btn" onclick="show('b')">B. Stepper vertical</button>
+  <button class="nav-btn" onclick="show('c')">C. Gate NO-GO</button>
+  <button class="nav-btn" onclick="show('d')">D. Card-based</button>
+  <button class="nav-btn" onclick="show('e')">E. Dashboard</button>
+  <button class="nav-btn" onclick="show('f')">F. Rapport bi-couche</button>
+  <button class="nav-btn" onclick="show('g')">G. Onboarding</button>
+  <button class="nav-btn" onclick="show('h')">H. Config SUVA</button>
+</nav>
+
+<!-- DIRECTION A: Classic Wizard + Sidebar (Desktop) -->
+<section id="dir-a" class="direction active">
+  <div class="direction-header">
+    <h2>A. Wizard classique + Sidebar résumé</h2>
+    <p>Layout 2 colonnes : le wizard occupe la zone principale, la sidebar à droite affiche le résumé temps réel. Stepper horizontal en haut pour la navigation entre étapes.</p>
+    <div class="tags"><span class="tag">Desktop ≥1024px</span><span class="tag">Pattern TurboTax</span><span class="tag">Recommandé</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame">
+      <div class="app-header">
+        <div class="app-logo">
+          <div class="app-logo-icon">TI</div>
+          <span class="app-logo-text">Travailleurs Isolés</span>
+        </div>
+        <div class="app-nav">
+          <a href="#">Dashboard</a>
+          <a href="#" class="active">Analyse</a>
+          <a href="#">Configuration</a>
+        </div>
+      </div>
+      <div class="d-a-layout">
+        <div class="d-a-main">
+          <div class="stepper">
+            <div class="stepper-item completed"><div class="stepper-dot">✓</div>Identification</div>
+            <div class="stepper-item completed"><div class="stepper-dot">✓</div>Travaux rég.</div>
+            <div class="stepper-item completed"><div class="stepper-dot">✓</div>Aptitudes</div>
+            <div class="stepper-item active"><div class="stepper-dot">5</div>Gravité</div>
+            <div class="stepper-item"><div class="stepper-dot">6</div>Probabilité</div>
+            <div class="stepper-item"><div class="stepper-dot">7</div>Matrice</div>
+            <div class="stepper-item"><div class="stepper-dot">•</div>...</div>
+          </div>
+
+          <h3 style="font-size:18px; margin-bottom:4px;">Étape 5 — Gravité du dommage</h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:24px;">Évaluez la gravité du dommage potentiel en répondant aux questions ci-dessous.</p>
+
+          <div class="form-group">
+            <div class="form-label">Quel type de blessure pourrait survenir en cas d'accident ? <span class="help-icon">?</span></div>
+            <div class="check-group">
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure légère sans arrêt de travail</div><div class="check-ref">Écorchures, petites coupures superficielles</div></div></div>
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure avec arrêt de travail, sans séquelles</div><div class="check-ref">Fracture simple, entorse, brûlure localisée</div></div></div>
+              <div class="check-item checked"><div class="check-box"></div><div><div class="check-label">Blessure moyenne avec atteinte irréversible possible</div><div class="check-ref">Perte partielle d'audition, lésion articulaire permanente</div></div></div>
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure grave avec atteinte irréversible</div><div class="check-ref">Amputation, paralysie, perte de la vue</div></div></div>
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure mortelle sans secours immédiats</div><div class="check-ref">Chute mortelle, électrocution, asphyxie</div></div></div>
+            </div>
+            <div class="form-hint" style="margin-top:8px;">→ Gravité évaluée : <strong>III — Moyen</strong> <span class="lock-icon">🔒 SUVA 44094.F</span></div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-secondary">← Précédent</button>
+            <button class="btn btn-primary">Suivant →</button>
+          </div>
+        </div>
+        <div class="d-a-sidebar">
+          <div class="sidebar-title">Résumé de l'analyse</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:38%"></div></div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-bottom:20px;">Étape 5/13 — ~12 min restantes</div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Identification</div>
+            <div class="sidebar-item"><span class="label">Activité</span><span class="value">Ronde surveillance</span></div>
+            <div class="sidebar-item"><span class="label">Période</span><span class="value">Nuit</span></div>
+            <div class="sidebar-item"><span class="label">Entreprise</span><span class="value">Chimie SA</span></div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Niveau 1 — Gate réglementaire</div>
+            <div class="sidebar-item"><span class="label">Travaux réglementés</span><span class="value" style="color:var(--success)">Aucun ✓</span></div>
+            <div class="sidebar-item"><span class="label">Personnel &lt;18</span><span class="value" style="color:var(--success)">Non ✓</span></div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Niveau 2 — Matrice</div>
+            <div class="sidebar-item"><span class="label">Gravité</span><span class="value">III — Moyen</span></div>
+            <div class="sidebar-item"><span class="label">Probabilité</span><span class="value" style="color:var(--text-secondary)">—</span></div>
+            <div class="sidebar-item"><span class="label">Zone</span><span class="value" style="color:var(--text-secondary)">En attente...</span></div>
+          </div>
+
+          <div style="padding:12px; background:#FFF8F0; border-radius:var(--radius); border:1px solid #FFE4CC; margin-top:16px;">
+            <div style="font-size:12px; font-weight:600; color:var(--primary); margin-bottom:4px;">Prochaine étape</div>
+            <div style="font-size:12px; color:var(--text-secondary);">La probabilité d'accident déterminera la zone de risque via la matrice SUVA.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION B: Vertical Stepper -->
+<section id="dir-b" class="direction">
+  <div class="direction-header">
+    <h2>B. Stepper vertical avec niveaux</h2>
+    <p>Navigation en 3 colonnes : stepper vertical à gauche organisé par niveaux SUVA, zone de formulaire au centre, sidebar résumé à droite. Ideal pour visualiser la structure 4 niveaux.</p>
+    <div class="tags"><span class="tag">Desktop ≥1024px</span><span class="tag">3 colonnes</span><span class="tag">Structure niveaux visible</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame">
+      <div class="app-header">
+        <div class="app-logo"><div class="app-logo-icon">TI</div><span class="app-logo-text">Travailleurs Isolés</span></div>
+        <div class="app-nav"><a href="#">Dashboard</a><a href="#" class="active">Analyse</a><a href="#">Configuration</a></div>
+      </div>
+      <div class="d-b-layout">
+        <div class="d-b-stepper">
+          <div class="v-step-level">Préparation</div>
+          <div class="v-step completed"><div class="v-step-dot"></div>Identification</div>
+
+          <div class="v-step-level">Niveau 1 — Gate réglementaire</div>
+          <div class="v-step completed"><div class="v-step-dot"></div>Travaux réglementés</div>
+          <div class="v-step completed"><div class="v-step-dot"></div>Aptitudes travailleur</div>
+
+          <div class="v-step-level">Niveau 2 — Matrice SUVA</div>
+          <div class="v-step completed"><div class="v-step-dot"></div>Danger principal</div>
+          <div class="v-step active"><div class="v-step-dot"></div>Gravité</div>
+          <div class="v-step"><div class="v-step-dot"></div>Probabilité</div>
+          <div class="v-step"><div class="v-step-dot"></div>Résultat matrice</div>
+
+          <div class="v-step-level">Niveau 3 — Faisabilité</div>
+          <div class="v-step"><div class="v-step-dot"></div>Conditions opérat.</div>
+          <div class="v-step"><div class="v-step-dot"></div>Concept d'urgence</div>
+
+          <div class="v-step-level">Niveau 4 — Validation</div>
+          <div class="v-step"><div class="v-step-dot"></div>Charge cognitive</div>
+          <div class="v-step"><div class="v-step-dot"></div>Outil d'alerte</div>
+          <div class="v-step"><div class="v-step-dot"></div>Formation</div>
+        </div>
+        <div class="d-b-main">
+          <h3 style="font-size:18px; margin-bottom:4px;">Gravité du dommage</h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:24px;">Niveau 2 — Étape 2/4</p>
+
+          <div class="form-group">
+            <div class="form-label">En cas d'accident, quelle serait la blessure la plus grave ? <span class="help-icon">?</span></div>
+            <div class="check-group">
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure légère — pas d'arrêt de travail</div></div></div>
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure avec arrêt — sans séquelles</div></div></div>
+              <div class="check-item checked"><div class="check-box"></div><div><div class="check-label">Blessure moyenne — atteinte irréversible possible</div></div></div>
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure grave — atteinte irréversible certaine</div></div></div>
+              <div class="check-item"><div class="check-box"></div><div><div class="check-label">Blessure mortelle — sans secours immédiats</div></div></div>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-secondary">← Précédent</button>
+            <button class="btn btn-primary">Suivant →</button>
+          </div>
+        </div>
+        <div class="d-b-sidebar">
+          <div class="sidebar-title">Résumé</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:38%"></div></div>
+          <div class="sidebar-section">
+            <div class="sidebar-item"><span class="label">Activité</span><span class="value">Ronde nuit</span></div>
+            <div class="sidebar-item"><span class="label">Gate N1</span><span class="value" style="color:var(--success)">GO ✓</span></div>
+            <div class="sidebar-item"><span class="label">Gravité</span><span class="value">III</span></div>
+            <div class="sidebar-item"><span class="label">Zone</span><span class="value">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION C: Gate NO-GO Alert -->
+<section id="dir-c" class="direction">
+  <div class="direction-header">
+    <h2>C. Gate NO-GO — Carte d'alerte</h2>
+    <p>Quand un gate NO-GO est déclenché, l'interface affiche une carte d'alerte claire avec le motif légal, la zone forcée et les actions possibles. Trois variantes : interdiction (Z1), reclassement (t_max), et avertissement.</p>
+    <div class="tags"><span class="tag">Moment critique</span><span class="tag">Confiance par transparence</span><span class="tag">Principe E1</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame" style="padding:32px; background:var(--bg-secondary);">
+      <h4 style="font-size:13px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Variante 1 — Gate NO-GO : Travail réglementé</h4>
+      <div class="gate-alert nogo">
+        <div class="gate-title" style="color:var(--zone1);">⛔ Zone 1 — Travail isolé INTERDIT</div>
+        <div class="gate-text">Le travail « <strong>Travaux en réservoirs / locaux exigus</strong> » est un travail réglementé. La présence obligatoire d'une 2ᵉ personne dédiée à la surveillance est exigée.</div>
+        <div class="gate-ref">Réf. : SUVA 1416.f ch. 2.3 — OPA art. 8 al. 1</div>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <span class="zone-badge z1">Zone 1</span>
+          <span class="lock-icon" style="font-size:12px;">🔒 Constante réglementaire — non modifiable</span>
+        </div>
+      </div>
+      <div class="btn-group" style="margin-top:16px;">
+        <button class="btn btn-secondary">← Modifier les réponses</button>
+        <button class="btn btn-primary">Voir le rapport →</button>
+      </div>
+
+      <h4 style="font-size:13px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin:32px 0 16px;">Variante 2 — Reclassement automatique (t_max ≤ 0)</h4>
+      <div class="gate-alert warning">
+        <div class="gate-title" style="color:var(--warning);">⚠️ Reclassement Zone 3 → Zone 2</div>
+        <div class="gate-text">Le délai maximal de sauvetage (t_max) pour la <strong>période nuit</strong> est de <strong>-3 minutes</strong>. La Zone 3 est impossible — l'analyse est automatiquement reclassée en <strong>Zone 2</strong> (surveillance continue obligatoire).</div>
+        <div class="gate-ref">Réf. : Calcul t_max = délai blessure − secouristes − ambulance − sauvetage</div>
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+          <span class="zone-badge z3" style="text-decoration:line-through; opacity:0.5;">Zone 3b</span>
+          <span style="color:var(--text-secondary);">→</span>
+          <span class="zone-badge z2">Zone 2</span>
+        </div>
+      </div>
+
+      <h4 style="font-size:13px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin:32px 0 16px;">Variante 3 — Avertissement non bloquant</h4>
+      <div class="gate-alert info">
+        <div class="gate-title" style="color:var(--info);">ℹ️ Avertissement — Délai secours publics > 15 minutes</div>
+        <div class="gate-text">Le délai d'arrivée des secours publics est de <strong>22 minutes</strong>. En Zone 2, un délai supérieur à 15 minutes nécessite des mesures compensatoires renforcées.</div>
+        <div class="gate-ref">Réf. : SUVA 44094.F ch. 7.2</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION D: Card-based Wizard (Tablette) -->
+<section id="dir-d" class="direction">
+  <div class="direction-header">
+    <h2>D. Wizard card-based (tablette)</h2>
+    <p>Version pour tablette/mobile : une carte centrée par étape avec un mini-résumé flottant. Plus aéré, conçu pour le touch. La sidebar devient un résumé compact en bas de carte.</p>
+    <div class="tags"><span class="tag">Tablette 768-1023px</span><span class="tag">Touch-first</span><span class="tag">Card pattern</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame">
+      <div class="app-header">
+        <div class="app-logo"><div class="app-logo-icon">TI</div><span class="app-logo-text">Travailleurs Isolés</span></div>
+        <div class="app-nav"><a href="#" class="active">Analyse</a></div>
+      </div>
+      <div class="d-d-layout">
+        <div class="d-d-center">
+          <div class="d-d-progress">
+            <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:38%"></div></div>
+            <div class="d-d-progress-text">5/13</div>
+          </div>
+          <div class="d-d-card">
+            <div style="font-size:12px; color:var(--primary); font-weight:500; margin-bottom:4px;">Niveau 2 — Matrice SUVA</div>
+            <h3 style="font-size:20px; margin-bottom:16px;">Gravité du dommage</h3>
+
+            <div class="check-group" style="gap:12px;">
+              <div class="check-item" style="padding:14px 16px;"><div class="check-box"></div><div><div class="check-label" style="font-size:15px;">Blessure légère</div><div class="check-ref">Pas d'arrêt de travail</div></div></div>
+              <div class="check-item" style="padding:14px 16px;"><div class="check-box"></div><div><div class="check-label" style="font-size:15px;">Blessure avec arrêt</div><div class="check-ref">Sans séquelles permanentes</div></div></div>
+              <div class="check-item checked" style="padding:14px 16px;"><div class="check-box"></div><div><div class="check-label" style="font-size:15px;">Blessure moyenne</div><div class="check-ref">Atteinte irréversible possible</div></div></div>
+              <div class="check-item" style="padding:14px 16px;"><div class="check-box"></div><div><div class="check-label" style="font-size:15px;">Blessure grave</div><div class="check-ref">Atteinte irréversible certaine</div></div></div>
+              <div class="check-item" style="padding:14px 16px;"><div class="check-box"></div><div><div class="check-label" style="font-size:15px;">Blessure mortelle</div><div class="check-ref">Sans secours immédiats</div></div></div>
+            </div>
+
+            <div class="btn-group" style="justify-content:space-between;">
+              <button class="btn btn-secondary" style="padding:12px 24px;">← Précédent</button>
+              <button class="btn btn-primary" style="padding:12px 24px;">Suivant →</button>
+            </div>
+          </div>
+          <div style="background:white; border-radius:12px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:13px; color:var(--text-secondary);">Ronde surveillance — Nuit</div>
+            <div style="font-size:13px;"><strong>Gravité : III</strong> · Zone : —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION E: Dashboard -->
+<section id="dir-e" class="direction">
+  <div class="direction-header">
+    <h2>E. Dashboard — Liste consolidée</h2>
+    <p>Vue d'ensemble des analyses avec filtres, badges de zone, statuts et alertes de révision. C'est l'écran d'accueil après l'onboarding.</p>
+    <div class="tags"><span class="tag">FR39-FR41</span><span class="tag">Vue d'ensemble</span><span class="tag">Filtres</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame">
+      <div class="app-header">
+        <div class="app-logo"><div class="app-logo-icon">TI</div><span class="app-logo-text">Travailleurs Isolés</span></div>
+        <div class="app-nav"><a href="#" class="active">Dashboard</a><a href="#">Analyse</a><a href="#">Configuration</a></div>
+      </div>
+      <div style="padding:24px 32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <div>
+            <h2 style="font-size:22px; font-weight:700;">Analyses</h2>
+            <p style="font-size:13px; color:var(--text-secondary);">Chimie SA — 6 analyses</p>
+          </div>
+          <button class="btn btn-primary">+ Nouvelle analyse</button>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:20px;">
+          <input class="form-input" style="max-width:240px; padding:8px 12px; font-size:13px;" placeholder="Rechercher..." />
+          <select class="form-input form-select" style="max-width:140px; padding:8px 12px; font-size:13px;"><option>Toutes zones</option></select>
+          <select class="form-input form-select" style="max-width:160px; padding:8px 12px; font-size:13px;"><option>Tous statuts</option></select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+          <div class="analysis-card">
+            <div class="analysis-card-header">
+              <div class="analysis-card-title">Contrôle cuves — Weekend</div>
+              <span class="zone-badge z1">Zone 1</span>
+            </div>
+            <div class="analysis-card-meta">Dept. Production · Réservoirs/exigus</div>
+            <div class="analysis-card-footer">
+              <span>Complété · 12.03.2026</span>
+              <span style="color:var(--zone1);">INTERDIT</span>
+            </div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-header">
+              <div class="analysis-card-title">Ronde surveillance — Nuit</div>
+              <span class="zone-badge z3">Zone 3b</span>
+            </div>
+            <div class="analysis-card-meta">Dept. Sécurité · Surveillance périodique 4h</div>
+            <div class="analysis-card-footer">
+              <span>Complété · 14.03.2026</span>
+              <span style="color:var(--success);">AUTORISÉ</span>
+            </div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-header">
+              <div class="analysis-card-title">Ronde surveillance — Jour</div>
+              <span class="zone-badge z4">Zone 4</span>
+            </div>
+            <div class="analysis-card-meta">Dept. Sécurité · Mesures de base</div>
+            <div class="analysis-card-footer">
+              <span>Complété · 14.03.2026</span>
+              <span style="color:var(--success);">AUTORISÉ</span>
+            </div>
+          </div>
+          <div class="analysis-card" style="border-color:var(--warning);">
+            <div class="analysis-card-header">
+              <div class="analysis-card-title">Maintenance chaudière — Nuit</div>
+              <span class="zone-badge z2">Zone 2</span>
+            </div>
+            <div class="analysis-card-meta">Dept. Technique · Surveillance continue</div>
+            <div class="analysis-card-footer">
+              <span style="color:var(--warning);">⚠ Révision dépassée</span>
+              <span>Échéance 01.03.2026</span>
+            </div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-header">
+              <div class="analysis-card-title">Nettoyage silos — Jour</div>
+              <span style="padding:4px 10px; background:var(--bg-secondary); border-radius:99px; font-size:12px; color:var(--text-secondary); border:1px solid var(--border);">Brouillon</span>
+            </div>
+            <div class="analysis-card-meta">Dept. Production · En cours...</div>
+            <div class="analysis-card-footer">
+              <span>Étape 7/13 · 15.03.2026</span>
+              <span>Reprendre →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION F: Report bi-couche -->
+<section id="dir-f" class="direction">
+  <div class="direction-header">
+    <h2>F. Rapport bi-couche</h2>
+    <p>Le rapport avec onglets "Vue Management" (couche 1 — langage naturel) et "Vue Technique" (couche 2 — scores, matrice, références). C'est ce que Sandra et Marc voient respectivement.</p>
+    <div class="tags"><span class="tag">FR19-FR24</span><span class="tag">Double audience</span><span class="tag">Principe P5</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame">
+      <div class="app-header">
+        <div class="app-logo"><div class="app-logo-icon">TI</div><span class="app-logo-text">Travailleurs Isolés</span></div>
+        <div class="app-nav"><a href="#">Dashboard</a><a href="#" class="active">Rapport</a><a href="#">Configuration</a></div>
+      </div>
+      <div style="padding:16px 32px 0; display:flex; justify-content:space-between; align-items:center;">
+        <div class="tab-bar" style="border:none;">
+          <div class="tab-item active">Vue Management</div>
+          <div class="tab-item">Vue Technique</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" style="font-size:13px; padding:8px 14px;">📄 PDF</button>
+          <button class="btn btn-secondary" style="font-size:13px; padding:8px 14px;">📊 CSV</button>
+        </div>
+      </div>
+      <div class="report-preview">
+        <div class="report-header">
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">SUVA 44094.F — Édition mai 2025</div>
+          <h3>Ronde de surveillance site industriel</h3>
+          <div class="report-subtitle">Chimie SA · Département Sécurité · Période : Nuit</div>
+        </div>
+
+        <div class="report-badge-row">
+          <span class="zone-badge zone-badge-lg z3">Zone 3b — Surveillance périodique</span>
+          <span style="font-size:13px; color:var(--text-secondary);">Intervalle max. 4h</span>
+        </div>
+
+        <div class="report-section">
+          <h4>Décision</h4>
+          <p style="font-size:14px; line-height:1.6;">Le travail isolé de ronde de surveillance en période de nuit est <strong>autorisé sous conditions</strong>. Un contrôle périodique toutes les 4 heures maximum est obligatoire, avec un système d'alerte vérifié.</p>
+        </div>
+
+        <div class="report-section">
+          <h4>Actions à mettre en place</h4>
+          <div class="report-action">
+            <div class="report-action-num">1</div>
+            <div>
+              <div class="report-action-text"><span class="report-req-badge legal">Exigence réglementaire</span></div>
+              <div class="report-action-text" style="margin-top:4px;">Équiper le collaborateur d'un dispositif PTI avec alarme automatique (détection de chute, immobilité)</div>
+            </div>
+          </div>
+          <div class="report-action">
+            <div class="report-action-num">2</div>
+            <div>
+              <div class="report-action-text"><span class="report-req-badge legal">Exigence réglementaire</span></div>
+              <div class="report-action-text" style="margin-top:4px;">Établir un contrôle périodique par le chef d'équipe toutes les 4 heures maximum</div>
+            </div>
+          </div>
+          <div class="report-action">
+            <div class="report-action-num">3</div>
+            <div>
+              <div class="report-action-text"><span class="report-req-badge reco">Recommandation</span></div>
+              <div class="report-action-text" style="margin-top:4px;">Vérifier la couverture réseau GSM sur l'ensemble du parcours de ronde avant chaque intervention</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h4>Informations clés</h4>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius);">
+              <div style="font-size:12px; color:var(--text-secondary);">Délai max. sauvetage</div>
+              <div style="font-size:18px; font-weight:600;">12 min</div>
+            </div>
+            <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius);">
+              <div style="font-size:12px; color:var(--text-secondary);">Prochaine révision</div>
+              <div style="font-size:18px; font-weight:600;">14.03.2027</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION G: Onboarding -->
+<section id="dir-g" class="direction">
+  <div class="direction-header">
+    <h2>G. Onboarding — 3 étapes</h2>
+    <p>Écran d'introduction pour les nouveaux utilisateurs. 3 écrans : définition du travailleur isolé, vue d'ensemble des 4 niveaux, informations à préparer.</p>
+    <div class="tags"><span class="tag">FR44</span><span class="tag">Premier contact</span><span class="tag">Émotion : curiosité</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame" style="background:var(--bg-secondary); padding:48px;">
+      <div class="onboard-card" style="background:white; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+        <div class="onboard-icon">📋</div>
+        <div class="onboard-dots">
+          <div class="onboard-dot"></div>
+          <div class="onboard-dot active"></div>
+          <div class="onboard-dot"></div>
+        </div>
+        <div class="onboard-title">4 niveaux d'analyse</div>
+        <div class="onboard-text">L'outil vous guide à travers 4 niveaux séquentiels. Chaque niveau peut produire une décision qui arrête ou continue l'analyse.</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; text-align:left; margin-bottom:24px;">
+          <div style="padding:12px 16px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="font-size:12px; font-weight:600; color:var(--primary); margin-bottom:4px;">Niveau 1</div>
+            <div style="font-size:13px;">Gate réglementaire</div>
+            <div style="font-size:11px; color:var(--text-secondary);">14 questions GO/NO-GO</div>
+          </div>
+          <div style="padding:12px 16px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="font-size:12px; font-weight:600; color:var(--primary); margin-bottom:4px;">Niveau 2</div>
+            <div style="font-size:13px;">Matrice des risques</div>
+            <div style="font-size:11px; color:var(--text-secondary);">Gravité × Probabilité</div>
+          </div>
+          <div style="padding:12px 16px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="font-size:12px; font-weight:600; color:var(--primary); margin-bottom:4px;">Niveau 3</div>
+            <div style="font-size:13px;">Faisabilité sauvetage</div>
+            <div style="font-size:11px; color:var(--text-secondary);">Calcul t_max par période</div>
+          </div>
+          <div style="padding:12px 16px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="font-size:12px; font-weight:600; color:var(--primary); margin-bottom:4px;">Niveau 4</div>
+            <div style="font-size:13px;">Validation outil d'alerte</div>
+            <div style="font-size:11px; color:var(--text-secondary);">Compatibilité équipement</div>
+          </div>
+        </div>
+
+        <div class="btn-group" style="justify-content:center;">
+          <button class="btn btn-secondary">← Précédent</button>
+          <button class="btn btn-primary">Suivant →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTION H: Config SUVA_CONST vs CONFIG -->
+<section id="dir-h" class="direction">
+  <div class="direction-header">
+    <h2>H. Configuration — SUVA_CONST vs CONFIG</h2>
+    <p>Page de configuration avec distinction visuelle entre les éléments verrouillés (constantes réglementaires) et les éléments configurables. Icône cadenas + zone grisée pour les SUVA_CONST.</p>
+    <div class="tags"><span class="tag">FR27, FR35-FR38</span><span class="tag">Distinction visuelle</span><span class="tag">Confiance</span></div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-frame">
+      <div class="app-header">
+        <div class="app-logo"><div class="app-logo-icon">TI</div><span class="app-logo-text">Travailleurs Isolés</span></div>
+        <div class="app-nav"><a href="#">Dashboard</a><a href="#">Analyse</a><a href="#" class="active">Configuration</a></div>
+      </div>
+      <div style="padding:24px 32px;">
+        <h2 style="font-size:22px; font-weight:700; margin-bottom:4px;">Configuration entreprise</h2>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:24px;">Chimie SA — Paramètres et taxonomies</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          <div>
+            <h4 style="font-size:14px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+              Départements et services
+              <span style="padding:2px 8px; background:#F0FDF4; color:var(--success); border-radius:4px; font-size:11px; font-weight:500;">CONFIG</span>
+            </h4>
+            <div style="border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+                <span>Production</span>
+                <span style="color:var(--text-secondary); cursor:pointer;">✏️ ✕</span>
+              </div>
+              <div style="padding:10px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+                <span>Sécurité</span>
+                <span style="color:var(--text-secondary); cursor:pointer;">✏️ ✕</span>
+              </div>
+              <div style="padding:10px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+                <span>Technique</span>
+                <span style="color:var(--text-secondary); cursor:pointer;">✏️ ✕</span>
+              </div>
+              <div style="padding:10px 14px; font-size:13px; color:var(--primary); cursor:pointer;">+ Ajouter un département</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="font-size:14px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+              Matrice des risques SUVA
+              <span style="padding:2px 8px; background:var(--bg-secondary); color:var(--suva-const); border-radius:4px; font-size:11px; font-weight:500;">🔒 SUVA_CONST</span>
+            </h4>
+            <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px; background:#FAFAFA; opacity:0.85;">
+              <table class="matrix">
+                <tr><th></th><th>V</th><th>IV</th><th>III</th><th>II</th><th>I</th></tr>
+                <tr><th>A</th><td class="cell-z4">4</td><td class="cell-z3a">3a</td><td class="cell-z2">2</td><td class="cell-z1">1</td><td class="cell-z1">1</td></tr>
+                <tr><th>B</th><td class="cell-z4">4</td><td class="cell-z3a">3a</td><td class="cell-z2">2</td><td class="cell-z2">2</td><td class="cell-z1">1</td></tr>
+                <tr><th>C</th><td class="cell-z4">4</td><td class="cell-z3a">3a</td><td class="cell-z3b">3b</td><td class="cell-z2">2</td><td class="cell-z2">2</td></tr>
+                <tr><th>D</th><td class="cell-z4">4</td><td class="cell-z3a">3a</td><td class="cell-z3b">3b</td><td class="cell-z3b">3b</td><td class="cell-z3b">3b</td></tr>
+                <tr><th>E</th><td class="cell-z4">4</td><td class="cell-z4">4</td><td class="cell-z4">4</td><td class="cell-z4">4</td><td class="cell-z3b">3b</td></tr>
+              </table>
+              <div style="margin-top:8px; font-size:11px; color:var(--suva-const); text-align:center;">Constante réglementaire SUVA 44094.F — Non modifiable</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('dir-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
