@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]
+stepsCompleted: [1, 2, 3, 4, 5]
 inputDocuments:
   - docs/cahier-des-charges.md
   - docs/specification-logique-analyse.md
@@ -120,3 +120,71 @@ Chaque niveau produit une décision claire et peut arrêter l'analyse avec un mo
 | **Fine-tuning utilisateur** | L'utilisateur peut ajuster les éléments configurables [CONFIG] et comprend ce qui est modifiable vs réglementaire [SUVA_CONST] | Distinction claire dans l'interface |
 | **Exactitude des calculs** | Résultats conformes à la matrice SUVA et aux formules de la spécification | 100% — zéro écart sur les constantes réglementaires |
 | **Image concrète** | Le rapport donne une vision claire et actionnable de la situation | Chaque analyse produit des mesures concrètes, pas des zones abstraites |
+
+---
+
+## Périmètre V1 (version complète)
+
+> **Note :** Pas de découpage MVP — la V1 livre l'intégralité des fonctionnalités. La spécification logique est suffisamment détaillée et le périmètre fonctionnel suffisamment bien cerné pour construire le produit complet d'emblée.
+
+### Fonctionnalités cœur
+
+| # | Fonctionnalité | Description |
+|---|---------------|-------------|
+| 1 | **Wizard 4 niveaux** | Gate réglementaire (14 questions GO/NO-GO) → Matrice SUVA (gravité × probabilité) → Faisabilité sauvetage (t_max par période) → Validation outil d'alerte. Chaque niveau peut stopper l'analyse avec motif légal. |
+| 2 | **Questionnaires intermédiaires** | Sous-questions en langage naturel qui calculent les codes techniques (probabilité P1-P4, charge cognitive C1-C3, fourchettes de délais). L'utilisateur ne manipule jamais les codes directement. |
+| 3 | **Moteur de calcul complet** | Matrice SUVA officielle, scores composites, algorithmes de reclassement, calcul t_max, matrice de fiabilité outil — toutes les formules de la spécification logique. |
+| 4 | **Rapport bi-couche** | Couche 1 : langage naturel pour le cadre et le collaborateur (décisions, actions concrètes). Couche 2 : détail technique pour le spécialiste (scores, matrices, références légales). |
+| 5 | **Distinction [CONFIG] / [SUVA_CONST]** | Éléments configurables par l'utilisateur clairement séparés des constantes réglementaires non modifiables dans l'interface. |
+| 6 | **Unité d'analyse TÂCHE × PÉRIODE** | Chaque combinaison tâche / période (jour, nuit, weekend) est analysée indépendamment avec ses propres paramètres et sa propre décision. |
+
+### Persistance & données
+
+| # | Fonctionnalité | Description |
+|---|---------------|-------------|
+| 7 | **Sauvegarde localStorage** | Brouillon automatique, reprise d'analyse interrompue, historique local des analyses. |
+| 8 | **Connexion Google Sheets** | Persistance cloud, consolidation multi-analyses, données chez le client (zéro backend propriétaire). |
+| 9 | **Configuration entreprise** | Départements, taxonomies personnalisables, paramètres [CONFIG] ajustables par organisation. |
+
+### Interface & expérience
+
+| # | Fonctionnalité | Description |
+|---|---------------|-------------|
+| 10 | **Sidebar résumé temps réel** | Synthèse dynamique mise à jour pendant la saisie — vue d'ensemble de l'analyse en cours. |
+| 11 | **Écran d'introduction / onboarding** | 3 étapes : définition travailleur isolé, vue d'ensemble des 4 niveaux, liste des informations à préparer. |
+| 12 | **Dashboard consolidé** | Vue d'ensemble de toutes les analyses d'une entreprise, statuts, alertes de révision. |
+| 13 | **Export PDF** | Génération du rapport bi-couche en PDF professionnel, prêt à être transmis ou archivé. |
+
+### Qualité & robustesse
+
+| # | Fonctionnalité | Description |
+|---|---------------|-------------|
+| 14 | **Validations et garde-fous** | Cohérence des données saisies, alertes sur incohérences, contrôles croisés entre niveaux. |
+| 15 | **Responsive tablette** | Interface utilisable sur tablette pour les visites terrain. |
+
+### Hors périmètre V1
+
+- Authentification utilisateur / gestion multi-utilisateurs
+- Backend propriétaire / base de données serveur
+- Application mobile native
+- Intégration avec des logiciels SST tiers
+- Multi-langue (V1 en français uniquement)
+
+### Critères de succès V1
+
+| Critère | Validation |
+|---------|-----------|
+| **Complétude fonctionnelle** | Les 4 niveaux du wizard sont opérationnels avec tous les algorithmes de la spécification |
+| **Exactitude réglementaire** | 100% de conformité avec la matrice SUVA et les constantes réglementaires |
+| **Utilisabilité terrain** | Pierre-Alain peut conduire une analyse complète en < 30 minutes sans aide |
+| **Qualité du rapport** | Le rapport couche 1 est compris par un cadre non-spécialiste sans reformulation |
+| **Persistance fiable** | Les données sont sauvegardées en localStorage ET synchronisées avec Google Sheets |
+
+### Vision future (post-V1)
+
+- **Multi-langue** : allemand, italien pour couvrir toute la Suisse
+- **Bibliothèque de cas types** : analyses pré-remplies par secteur (industrie, BTP, santé, agriculture)
+- **Mode collaboratif** : plusieurs spécialistes travaillent sur les analyses d'une même entreprise
+- **API / intégration** : connecteurs vers les logiciels SST du marché suisse
+- **Intelligence augmentée** : suggestions basées sur l'historique des analyses similaires
+- **Certification / labellisation** : reconnaissance officielle par la SUVA ou les organismes de formation STPS
