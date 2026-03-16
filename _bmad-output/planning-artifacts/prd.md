@@ -20,6 +20,8 @@ lastEdited: 2026-03-16
 editHistory:
   - date: 2026-03-16
     changes: "DaisyUI remplacé par Shadcn UI + palette Tailwind dans Executive Summary et Web App Requirements"
+  - date: 2026-03-16
+    changes: "Post-validation: FR2/FR9/FR37/FR42 affinées SMART, FR29-34 abstraction implémentation, FR8/FR21 intégrées parcours"
 inputDocuments:
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
   - docs/cahier-des-charges.md
@@ -114,13 +116,13 @@ Utilisateurs cibles : les spécialistes STPS / consultants SST qui conduisent le
 
 **Action montante :** Marc crée une nouvelle analyse. Il identifie le poste : "Contrôle des cuves de stockage — Week-end". Le wizard l'emmène au Niveau 1. Les 14 questions réglementaires s'affichent avec les références légales exactes. Il coche "Travaux en réservoirs / locaux exigus" → l'application affiche immédiatement : **Zone 1 — Travail isolé INTERDIT** avec la référence SUVA 1416.f ch. 2.3. L'analyse s'arrête net avec un motif légal précis.
 
-Marc revient en arrière et lance une deuxième analyse pour un autre poste : "Ronde de surveillance site industriel — Nuit". Cette fois, aucun travail réglementé n'est coché. Le wizard passe au Niveau 2. Les questions intermédiaires en langage naturel l'aident à déterminer la gravité (III — Moyen) et la probabilité (C — Rare). Il ne manipule aucun code — l'outil traduit ses réponses. La matrice affiche : **Zone 3b**.
+Marc revient en arrière et lance une deuxième analyse pour un autre poste : "Ronde de surveillance site industriel — Nuit". Cette fois, aucun travail réglementé n'est coché. Le wizard passe au Niveau 2. Marc vérifie les aptitudes du travailleur selon les 3 dimensions (psychique, physique, intellectuelle) — tout est conforme. Les questions intermédiaires en langage naturel l'aident à déterminer la gravité (III — Moyen) et la probabilité (C — Rare). Il ne manipule aucun code — l'outil traduit ses réponses. La matrice affiche : **Zone 3b**.
 
 Le Niveau 3 calcule le t_max pour la période nuit : les délais de secouristes de nuit (25 min) et des secours publics (18 min) produisent un t_max de 12 minutes. Faisable. Le Niveau 4 valide l'outil d'alerte : un PTI GSM avec couverture réseau partielle. La matrice de fiabilité alerte sur la couverture — Marc note une mesure corrective.
 
 **Climax :** Marc génère le rapport bi-couche. La couche 1 affiche en langage clair : "Ronde de surveillance autorisée en période nuit sous condition d'un contrôle périodique toutes les 4h et d'un PTI avec vérification de couverture réseau." La couche 2 détaille les scores, la matrice, les formules de t_max et les références SUVA. Pour la première fois, Marc a un rapport qu'il peut envoyer directement au cadre sans devoir le "traduire".
 
-**Résolution :** Marc exporte le PDF, le synchronise sur le Google Sheet du client. L'analyse complète a pris 22 minutes. Il programme la date de révision à 12 mois. Sur le dashboard, il voit les 5 analyses du site consolidées avec leurs zones respectives. Il envoie le rapport couche 1 à Sandra, la responsable d'exploitation.
+**Résolution :** Marc exporte le PDF et le CSV des données brutes pour archivage, puis synchronise sur le Google Sheet du client. L'analyse complète a pris 22 minutes. Il programme la date de révision à 12 mois. Sur le dashboard, il voit les 5 analyses du site consolidées avec leurs zones respectives. Il envoie le rapport couche 1 à Sandra, la responsable d'exploitation.
 
 ---
 
@@ -164,7 +166,7 @@ Marc hésite sur la gravité du dommage. Il revient à l'étape 5, modifie sa r�
 
 | Parcours | Capacités révélées |
 |----------|-------------------|
-| **Marc — Analyse complète** | Wizard 4 niveaux, questionnaires intermédiaires, matrice SUVA, calcul t_max, rapport bi-couche, export PDF, synchronisation Google Sheets, sidebar résumé temps réel, programmation date de révision |
+| **Marc — Analyse complète** | Wizard 4 niveaux, questionnaires intermédiaires, vérification aptitudes travailleur, matrice SUVA, calcul t_max, rapport bi-couche, export PDF, export CSV, synchronisation Google Sheets, sidebar résumé temps réel, programmation date de révision |
 | **Marc — Cas limite** | Sauvegarde/reprise localStorage, reclassement automatique, recalcul en temps réel, navigation arrière dans le wizard, analyses multiples par poste (TÂCHE × PÉRIODE) |
 | **Sandra — Rapport** | Rapport couche 1 en langage naturel, badges visuels de zone, distinction exigence réglementaire vs recommandation, actions concrètes numérotées, PDF professionnel |
 | **Marc admin — Configuration** | Connexion OAuth2 Google Sheets, configuration taxonomies, personnalisation libellés, verrouillage visuel [SUVA_CONST], création automatique des onglets Sheet, gestion multi-entreprises |
@@ -430,14 +432,14 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 ### Analyse guidée (Wizard)
 
 - **FR1:** Le spécialiste peut créer une nouvelle analyse en identifiant l'entreprise, le département, le responsable, le titre de l'activité, la description, le nombre de personnes, la période de travail et la fréquence d'activité isolée
-- **FR2:** Le spécialiste peut définir l'unité d'analyse comme une combinaison TÂCHE × PÉRIODE, avec la possibilité de créer plusieurs analyses pour un même poste
+- **FR2:** Le spécialiste peut définir l'unité d'analyse comme une combinaison TÂCHE × PÉRIODE et créer au moins 2-3 analyses par poste pour capturer les variations par période (jour, nuit, weekend)
 - **FR3:** Le spécialiste peut répondre à une checklist de 14 catégories de travaux réglementés avec les références légales associées (Gate Niveau 1)
 - **FR4:** Le système stoppe l'analyse avec un motif légal précis si un travail réglementé est coché ou si le personnel est mineur (Gate NO-GO)
 - **FR5:** Le spécialiste peut évaluer la gravité du dommage (I à V) via des questions intermédiaires en langage naturel sans manipuler les codes techniques
 - **FR6:** Le spécialiste peut évaluer la probabilité d'accident (A à E) via des questions intermédiaires en langage naturel sans manipuler les codes techniques
 - **FR7:** Le système calcule la zone de risque (1 à 4) à partir de la matrice SUVA 5×5 (Gate Niveau 2)
 - **FR8:** Le spécialiste peut vérifier les aptitudes du travailleur selon 3 dimensions : psychique, physique, intellectuelle
-- **FR9:** Le spécialiste peut décrire le danger principal identifié avec des aides contextuelles
+- **FR9:** Le spécialiste peut décrire le danger identifié via un champ texte structuré (150-300 caractères) avec une liste déroulante de catégories de dangers prédéfinies par type de travail réglementé
 - **FR10:** Le spécialiste peut saisir les conditions opérationnelles : couverture réseau, équipements DATI, centrale d'alarme, délais de secouristes (jour/nuit), délais secours publics
 - **FR11:** Le système calcule le t_max par période et détermine la faisabilité du sauvetage (Gate Niveau 3)
 - **FR12:** Le système reclasse automatiquement en Zone 2 si t_max ≤ 0 pour une période donnée
@@ -466,18 +468,18 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 
 ### Persistance et données
 
-- **FR29:** Le système sauvegarde automatiquement l'analyse en cours dans le localStorage du navigateur
-- **FR30:** Le spécialiste peut reprendre une analyse interrompue depuis le localStorage
-- **FR31:** Le spécialiste peut connecter un Google Sheet d'entreprise via OAuth2 (Phase 2)
-- **FR32:** Le système synchronise les analyses avec le Google Sheet connecté (Phase 2)
-- **FR33:** Le système crée automatiquement la structure d'onglets dans le Google Sheet au premier accès (Phase 2)
-- **FR34:** Le système fonctionne en mode hors-ligne avec localStorage seul si Google Sheets n'est pas disponible
+- **FR29:** Le système sauvegarde automatiquement l'analyse en cours localement dans le navigateur (toutes les 30s ou à chaque changement d'étape)
+- **FR30:** Le spécialiste peut reprendre une analyse interrompue après fermeture du navigateur ou coupure de courant
+- **FR31:** Le spécialiste peut connecter un espace de stockage cloud d'entreprise pour la synchronisation des données (Phase 2)
+- **FR32:** Le système synchronise les analyses avec l'espace de stockage cloud connecté (Phase 2)
+- **FR33:** Le système crée automatiquement la structure de données dans l'espace de stockage cloud au premier accès (Phase 2)
+- **FR34:** Le système reste 100% fonctionnel sans connexion internet (sauvegarde locale seule, synchronisation cloud différée)
 
 ### Configuration entreprise
 
 - **FR35:** Le spécialiste peut configurer les départements et services de l'entreprise (Phase 2)
 - **FR36:** Le spécialiste peut configurer la liste des équipements DATI disponibles (Phase 2)
-- **FR37:** Le spécialiste peut personnaliser les libellés des taxonomies configurables [CONFIG] (Phase 3)
+- **FR37:** Le spécialiste peut personnaliser jusqu'à 5 champs taxonomiques [CONFIG] (départements, types d'équipement, types d'alerte, libellés de fréquence, prestataires de formation) avec validation de format (Phase 3)
 - **FR38:** Le spécialiste ne peut pas modifier les constantes réglementaires [SUVA_CONST]
 
 ### Dashboard et consolidation
@@ -488,7 +490,7 @@ Le product brief le confirme : "La spécification logique est suffisamment déta
 
 ### Guidage et aide contextuelle
 
-- **FR42:** Le système affiche une aide contextuelle sur chaque champ du wizard
+- **FR42:** Le système affiche un tooltip d'aide contextuelle sur 100% des champs de saisie du wizard (Niveaux 1-4), couvrant la définition réglementaire, un exemple et les erreurs courantes
 - **FR43:** Le système affiche un résumé dynamique de l'analyse en cours mis à jour en temps réel (Phase 2)
 - **FR44:** Le système présente un écran d'introduction expliquant la méthode en 3 étapes (Phase 3)
 
