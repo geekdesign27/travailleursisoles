@@ -5,6 +5,7 @@ stepsCompleted:
   - step-03-starter
   - step-04-decisions
   - step-05-patterns
+  - step-06-structure
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/product-brief-analyse-travailleurs-isoles-2026-03-16.md
@@ -333,4 +334,201 @@ Le recalcul est synchrone (< 50ms NFR3), déclenché à chaque modification dans
 - Stocker des données calculées dans localStorage → recalculer à partir des données sources
 - Mélanger logique métier et composants UI → séparer dans `/features/engine/`
 - Utiliser `any` → toujours typer via les schémas Zod
+
+## Project Structure & Boundaries
+
+### Complete Project Directory Structure
+
+```
+analyse-travailleurs-isoles/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                    → Build + Vitest + Playwright
+├── e2e/
+│   ├── wizard-complete.spec.ts       → Parcours 1 Marc complet
+│   ├── wizard-edge-cases.spec.ts     → Parcours 2 Marc cas limites
+│   ├── report-export.spec.ts         → Export PDF + CSV
+│   └── config-enterprise.spec.ts     → Parcours 4 Marc admin
+├── public/
+│   └── favicon.svg
+├── src/
+│   ├── main.tsx                      → Point d'entrée React
+│   ├── App.tsx                       → Router principal (M1-M7)
+│   ├── index.css                     → @import "tailwindcss" + @theme {}
+│   ├── vite-env.d.ts
+│   │
+│   ├── components/
+│   │   ├── ui/                       → Shadcn UI (auto-généré)
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── tooltip.tsx
+│   │   │   ├── tabs.tsx
+│   │   │   ├── separator.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── checkbox.tsx
+│   │   │   ├── radio-group.tsx
+│   │   │   ├── textarea.tsx
+│   │   │   ├── progress.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   └── form.tsx
+│   │   └── shared/                   → Composants métier partagés
+│   │       ├── ZoneBadge.tsx         → Badge coloré Z1-Z4
+│   │       ├── SuvaTooltip.tsx       → Tooltip aide contextuelle SUVA
+│   │       ├── RegulatoryLock.tsx    → Indicateur [SUVA_CONST] verrouillé
+│   │       ├── ErrorBoundary.tsx     → Error boundary par feature
+│   │       └── AppLayout.tsx         → Layout responsive 3 breakpoints
+│   │
+│   ├── features/
+│   │   ├── wizard/                   → FR1-FR18 : Wizard 4 niveaux
+│   │   │   ├── WizardPage.tsx
+│   │   │   ├── WizardNavigation.tsx
+│   │   │   ├── WizardSidebar.tsx     → FR43 : sidebar résumé temps réel
+│   │   │   ├── wizard.schema.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useWizardForm.ts
+│   │   │   │   └── useWizardNavigation.ts
+│   │   │   └── steps/
+│   │   │       ├── Step01Identification.tsx    → FR1, FR2
+│   │   │       ├── Step02RegulatedWork.tsx     → FR3, FR4
+│   │   │       ├── Step03WorkerAptitudes.tsx   → FR8
+│   │   │       ├── Step04DangerDescription.tsx → FR9
+│   │   │       ├── Step05Gravity.tsx           → FR5
+│   │   │       ├── Step06Probability.tsx       → FR6
+│   │   │       ├── Step07MatrixResult.tsx      → FR7
+│   │   │       ├── Step08Conditions.tsx        → FR10
+│   │   │       ├── Step09Emergency.tsx         → FR15
+│   │   │       ├── Step10CognitiveLoad.tsx     → FR14
+│   │   │       ├── Step11TmaxResult.tsx        → FR11, FR12
+│   │   │       ├── Step12AlertTool.tsx         → FR13
+│   │   │       └── Step13Training.tsx          → FR16
+│   │   │
+│   │   ├── engine/                   → Moteur de calcul réglementaire
+│   │   │   ├── matrixCalculator.ts        + matrixCalculator.test.ts
+│   │   │   ├── tmaxCalculator.ts          + tmaxCalculator.test.ts
+│   │   │   ├── reclassement.ts            + reclassement.test.ts
+│   │   │   ├── alertToolValidator.ts      + alertToolValidator.test.ts
+│   │   │   ├── probabilityEstimator.ts    + probabilityEstimator.test.ts
+│   │   │   ├── cognitiveLoadEstimator.ts  + cognitiveLoadEstimator.test.ts
+│   │   │   ├── gateEvaluator.ts           + gateEvaluator.test.ts
+│   │   │   └── decisionAggregator.ts      + decisionAggregator.test.ts
+│   │   │
+│   │   ├── report/                   → FR19-FR24 : Rapport + exports
+│   │   │   ├── ReportPage.tsx
+│   │   │   ├── ReportLayer1.tsx      → Couche 1 langage naturel
+│   │   │   ├── ReportLayer2.tsx      → Couche 2 détail technique
+│   │   │   ├── PdfExporter.tsx       → FR20
+│   │   │   ├── CsvExporter.tsx       → FR21
+│   │   │   └── reportGenerator.ts
+│   │   │
+│   │   ├── persistence/              → FR29-FR34 : Persistance
+│   │   │   ├── hooks/
+│   │   │   │   ├── useLocalStorage.ts
+│   │   │   │   └── useGoogleSheets.ts
+│   │   │   ├── localStorageService.ts
+│   │   │   ├── syncQueue.ts
+│   │   │   ├── sheetsService.ts
+│   │   │   └── sheetsMapper.ts       → Mapping camelCase ↔ snake_case
+│   │   │
+│   │   ├── config/                   → FR35-FR38 : Configuration
+│   │   │   ├── ConfigPage.tsx
+│   │   │   ├── TaxonomyEditor.tsx
+│   │   │   ├── GoogleSheetsConnect.tsx
+│   │   │   └── config.schema.ts
+│   │   │
+│   │   ├── dashboard/                → FR39-FR41 : Dashboard
+│   │   │   ├── DashboardPage.tsx
+│   │   │   ├── AnalysisList.tsx
+│   │   │   ├── AnalysisFilters.tsx
+│   │   │   └── RevisionAlerts.tsx    → FR41
+│   │   │
+│   │   └── help/                     → FR42-FR44 : Guidage
+│   │       ├── OnboardingScreen.tsx  → FR44
+│   │       └── contextualHelp.ts     → FR42 : données tooltips par champ
+│   │
+│   ├── constants/                    → SUVA_REGULATORY_CONSTANT
+│   │   ├── suvaMatrix.ts            → Matrice 5×5 (25 cellules)
+│   │   ├── suvaRules.ts             → R1-R7
+│   │   ├── suvaZones.ts             → Descriptions Z1-Z4
+│   │   ├── regulatedWork.ts         → 14 travaux réglementés + réf. légales
+│   │   ├── gravityLevels.ts         → I-V descriptions
+│   │   ├── probabilityLevels.ts     → A-E descriptions
+│   │   └── alertTools.ts            → Matrice compatibilité zone × outil
+│   │
+│   ├── contexts/
+│   │   ├── AnalysisContext.tsx
+│   │   ├── ConfigContext.tsx
+│   │   └── AppContext.tsx
+│   │
+│   ├── types/
+│   │   └── analysis.schema.ts       → Schéma Zod source de vérité
+│   │
+│   └── lib/
+│       └── utils.ts                  → cn() helper Shadcn
+│
+├── .env.example                      → VITE_GOOGLE_CLIENT_ID, VITE_GOOGLE_API_KEY
+├── .gitignore
+├── index.html
+├── package.json
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── vite.config.ts
+├── vitest.config.ts
+├── playwright.config.ts
+└── components.json                   → Config Shadcn UI
+```
+
+### Architectural Boundaries
+
+**Frontière moteur de calcul ↔ UI :**
+- Le moteur (`/features/engine/`) est 100% fonctions pures TypeScript, sans dépendance React
+- Les composants wizard appellent les fonctions du moteur via des hooks
+- Le moteur ne connaît pas l'UI — il reçoit des données typées et retourne des résultats typés
+
+**Frontière persistance ↔ métier :**
+- `localStorageService.ts` et `sheetsService.ts` sont les seuls points d'accès aux données
+- Le wizard et le dashboard passent par les hooks `useLocalStorage` et `useGoogleSheets`
+- Le mapping camelCase ↔ snake_case est isolé dans `sheetsMapper.ts`
+
+**Frontière constantes ↔ config :**
+- `/constants/` : SUVA_CONST — codé en dur, importé directement, jamais modifié
+- `/features/config/` : CONFIG — lu depuis Google Sheets, modifiable par l'utilisateur
+- Les composants UI distinguent visuellement les deux via `<RegulatoryLock />`
+
+### Requirements to Structure Mapping
+
+| Domaine FRs | Répertoire principal | Fichiers clés |
+|-------------|---------------------|---------------|
+| FR1-FR18 Wizard | `/features/wizard/` | 13 composants Step, hooks, schémas |
+| FR19-FR24 Rapport | `/features/report/` | ReportPage, PdfExporter, CsvExporter |
+| FR25-FR28 Conformité | `/constants/` + `/features/engine/` | Transversal — matrice, règles, gates |
+| FR29-FR34 Persistance | `/features/persistence/` | localStorage, sync queue, sheets |
+| FR35-FR38 Config | `/features/config/` | ConfigPage, TaxonomyEditor, OAuth |
+| FR39-FR41 Dashboard | `/features/dashboard/` | DashboardPage, filtres, alertes |
+| FR42-FR44 Guidage | `/features/help/` + composants wizard | Onboarding, tooltips, sidebar |
+
+### Data Flow
+
+```
+Utilisateur (wizard) → React Hook Form → Zod validation → AnalysisContext (useReducer)
+                                                                ↓
+                                                    Engine (recalcul synchrone)
+                                                                ↓
+                                                    AnalysisContext (state mis à jour)
+                                                          ↓              ↓
+                                              localStorage (auto 30s)   UI (re-render)
+                                                          ↓
+                                              syncQueue → Google Sheets (batch 30s)
+```
+
+### External Integrations
+
+| Service | Point d'intégration | Fichier |
+|---------|-------------------|---------|
+| Google Identity Services | OAuth2 login | `/features/config/GoogleSheetsConnect.tsx` |
+| Google Sheets API v4 | CRUD analyses + config | `/features/persistence/sheetsService.ts` |
+| jsPDF + html2canvas | Génération PDF client | `/features/report/PdfExporter.tsx` |
 
