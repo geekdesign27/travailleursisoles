@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -30,6 +29,24 @@
     --chart-4: oklch(0.488 0.243 264.376);
     --chart-5: oklch(0.424 0.199 265.638);
     --radius: 0.625rem;
+
+    /* SUVA Zone Colors */
+    --suva-zone-1: oklch(0.45 0.2 25);
+    --suva-zone-2: oklch(0.7 0.18 60);
+    --suva-zone-3: oklch(0.82 0.15 85);
+    --suva-zone-4: oklch(0.65 0.15 140);
+
+    /* SUVA Primary */
+    --suva-primary: oklch(0.6 0.2 45);
+    --suva-primary-hover: oklch(0.52 0.18 42);
+
+    /* Semantic */
+    --suva-success: oklch(0.55 0.17 145);
+    --suva-warning: oklch(0.6 0.16 70);
+    --suva-error: oklch(0.55 0.22 25);
+    --suva-info: oklch(0.5 0.2 260);
+    --suva-const: oklch(0.65 0.02 260);
+
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -75,7 +92,7 @@
 }
 
 @theme inline {
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: 'Inter', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -114,6 +131,19 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+
+    /* SUVA custom colors */
+    --color-suva-zone-1: var(--suva-zone-1);
+    --color-suva-zone-2: var(--suva-zone-2);
+    --color-suva-zone-3: var(--suva-zone-3);
+    --color-suva-zone-4: var(--suva-zone-4);
+    --color-suva-primary: var(--suva-primary);
+    --color-suva-primary-hover: var(--suva-primary-hover);
+    --color-suva-success: var(--suva-success);
+    --color-suva-warning: var(--suva-warning);
+    --color-suva-error: var(--suva-error);
+    --color-suva-info: var(--suva-info);
+    --color-suva-const: var(--suva-const);
 }
 
 @layer base {

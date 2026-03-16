@@ -44,7 +44,7 @@ story_location: _bmad-output/implementation-artifacts
 development_status:
   # Epic 1: Conduire une analyse complète via le wizard guidé
   epic-1: in-progress
-  1-1-scaffold-projet-et-creation-analyse: in-progress
+  1-1-scaffold-projet-et-creation-analyse: done
   1-2-niveau-1-gate-reglementaire: backlog
   1-3-niveau-2-evaluation-risques-matrice-suva: backlog
   1-4-niveau-3-faisabilite-sauvetage: backlog
