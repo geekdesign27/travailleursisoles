@@ -169,14 +169,16 @@ export function DashboardPage() {
   }
 
   function handleCardClick(analysis: AnalysisWithZone) {
+    // Try localStorage first, fall back to the analysis object itself (from Sheets)
+    const full = loadAnalysis(analysis.id) ?? analysis;
+
     if (analysis.status === "completed") {
+      dispatch({ type: "analysis/LOAD", payload: full });
       navigate(`/analysis/${analysis.id}/report`);
       return;
     }
 
     // Draft or in_progress: load and resume wizard at current step
-    const full = loadAnalysis(analysis.id);
-    if (!full) return;
     dispatch({ type: "analysis/LOAD", payload: full });
     const route = STEP_ROUTES[full.currentStep] ?? "";
     navigate(`/analysis/${full.id}${route}`);
