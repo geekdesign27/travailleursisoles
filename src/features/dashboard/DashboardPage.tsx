@@ -279,8 +279,8 @@ export function DashboardPage() {
         </div>
       )}
 
-      {allAnalyses.length === 0 ? (
-        /* Empty state: no analyses at all */
+      {allAnalyses.length === 0 && !sheetsLoading ? (
+        /* Empty state: no analyses at all (and not currently loading) */
         <Card>
           <CardContent className="flex flex-col items-center py-12 text-center">
             <p className="mb-2 text-lg font-medium text-muted-foreground">

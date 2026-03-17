@@ -39,9 +39,12 @@ const SPREADSHEET_KEY = "app:google-sheets-id";
 
 function loadSpreadsheetId(): string | null {
   try {
-    return localStorage.getItem(SPREADSHEET_KEY);
+    // Check localStorage first, then fall back to env var default
+    const stored = localStorage.getItem(SPREADSHEET_KEY);
+    if (stored) return stored;
+    return import.meta.env.VITE_DEFAULT_SPREADSHEET_ID ?? null;
   } catch {
-    return null;
+    return import.meta.env.VITE_DEFAULT_SPREADSHEET_ID ?? null;
   }
 }
 
