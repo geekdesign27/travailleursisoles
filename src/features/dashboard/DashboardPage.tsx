@@ -18,6 +18,8 @@ import {
 } from "@/features/persistence/localStorageService";
 import { useAnalysisResume } from "@/features/persistence/useAnalysisResume";
 import { useAnalysis } from "@/contexts/AnalysisContext";
+import { useSheetAnalyses } from "@/features/sync/useSheetAnalyses";
+import { useGoogleSheets } from "@/contexts/GoogleSheetsContext";
 import type { ZoneRisque } from "@/constants/suvaMatrix";
 import {
   type AnalysisWithZone,
@@ -35,7 +37,15 @@ import {
   paginateAnalyses,
   sortAnalyses,
 } from "./dashboardHelpers";
-import { AlertTriangle, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  CloudIcon,
+  Loader2Icon,
+  RefreshCwIcon,
+} from "lucide-react";
 
 // Map currentStep to route segments (same as useAnalysisResume)
 const STEP_ROUTES: Record<number, string> = {
@@ -80,8 +90,17 @@ export function DashboardPage() {
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(0);
 
-  // Load all analyses with full data for zone/revision info
-  const allAnalyses = useMemo<AnalysisWithZone[]>(() => {
+  // Google Sheets data
+  const { state: sheetsState } = useGoogleSheets();
+  const {
+    sheetAnalyses,
+    isLoading: sheetsLoading,
+    error: sheetsError,
+    refetch: refetchSheets,
+  } = useSheetAnalyses();
+
+  // Load local analyses
+  const localAnalyses = useMemo<AnalysisWithZone[]>(() => {
     const index = listAnalyses();
     return index
       .map((entry) => {
@@ -90,6 +109,15 @@ export function DashboardPage() {
       })
       .filter((a): a is AnalysisWithZone => a !== null);
   }, []);
+
+  // Merge: local + sheet (sheet analyses not already in local, deduped by id)
+  const allAnalyses = useMemo<AnalysisWithZone[]>(() => {
+    const localIds = new Set(localAnalyses.map((a) => a.id));
+    const fromSheet = sheetAnalyses
+      .filter((a) => !localIds.has(a.id))
+      .map(enrichAnalysis);
+    return [...localAnalyses, ...fromSheet];
+  }, [localAnalyses, sheetAnalyses]);
 
   // Extract unique departements for filter
   const departements = useMemo(
@@ -168,6 +196,47 @@ export function DashboardPage() {
           Nouvelle analyse
         </Link>
       </div>
+
+      {/* Google Sheets sync indicator */}
+      {sheetsState.configured && sheetsState.spreadsheetId && (
+        <div className="mb-6 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-blue-900">
+          <CloudIcon className="size-4 shrink-0" />
+          <div className="flex-1 text-sm">
+            {sheetsLoading ? (
+              <span className="flex items-center gap-2">
+                <Loader2Icon className="size-3 animate-spin" />
+                Chargement depuis Google Sheets...
+              </span>
+            ) : sheetsError ? (
+              <span className="text-red-600">
+                Erreur Sheets : {sheetsError}
+              </span>
+            ) : (
+              <span>
+                {sheetAnalyses.length} analyse
+                {sheetAnalyses.length !== 1 ? "s" : ""} depuis Google Sheets
+                {localAnalyses.length > 0 && (
+                  <>
+                    {" "}
+                    &middot; {localAnalyses.length} locale
+                    {localAnalyses.length !== 1 ? "s" : ""}
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={refetchSheets}
+            disabled={sheetsLoading}
+          >
+            <RefreshCwIcon
+              className={`size-4 ${sheetsLoading ? "animate-spin" : ""}`}
+            />
+          </Button>
+        </div>
+      )}
 
       {/* Resume banner */}
       {resumable && (
