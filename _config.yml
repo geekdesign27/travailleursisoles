@@ -1,0 +1,25 @@
+title: "Travailleurs Isolés - Documentation"
+description: "Analyse de risques et spécifications pour la gestion des travailleurs isolés"
+theme: minima
+markdown: kramdown
+
+exclude:
+  - _bmad
+  - .claude
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
+include:
+  - _bmad-output
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+nav_order:
+  - index.md
+  - docs
+  - _bmad-output
