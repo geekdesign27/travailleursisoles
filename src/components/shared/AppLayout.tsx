@@ -1,5 +1,6 @@
 import { Link, Outlet } from "react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { SettingsIcon } from "lucide-react";
 
 export function AppLayout() {
   return (
@@ -18,7 +19,14 @@ export function AppLayout() {
           aria-label="Navigation principale"
         >
           <Link to="/" className="text-lg font-semibold text-foreground">
-            SUVA 44094.F
+            Analyse des travailleurs isolés
+          </Link>
+          <Link
+            to="/config"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <SettingsIcon className="size-4" />
+            Configuration
           </Link>
         </nav>
       </header>
