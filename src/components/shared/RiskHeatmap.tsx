@@ -50,21 +50,13 @@ const PROBABILITY_LABELS: Record<ProbabilityLevel, string> = {
   E: "Très fréquent",
 };
 
-// Vivid zone colors for cell backgrounds
+// SUVA official matrix colors — vivid, used for both cell fill and legend
 const ZONE_COLORS: Record<string, string> = {
-  "1": "#ef4444", // red-500 vivid
-  "2": "#f97316", // orange-500
-  "3a": "#eab308", // yellow-500
-  "3b": "#a3e635", // lime-400
-  "4": "#22c55e", // green-500
-};
-
-const ZONE_BG: Record<string, string> = {
-  "1": "#fca5a5", // red-300
-  "2": "#fdba74", // orange-300
-  "3a": "#fde047", // yellow-300
-  "3b": "#d9f99d", // lime-200
-  "4": "#86efac", // green-300
+  "1": "#e53e3e", // red — Interdit
+  "2": "#ed8936", // orange — Surveillance
+  "3a": "#ecc94b", // yellow — Contrôle
+  "3b": "#ecc94b", // yellow — Contrôle (same zone 3)
+  "4": "#48bb78", // green — Autorisé
 };
 
 // Anthracite for circles
@@ -238,7 +230,7 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
                       y={y}
                       width={CELL_W}
                       height={CELL_H}
-                      fill={ZONE_BG[zoneStr]}
+                      fill={ZONE_COLORS[zoneStr]}
                       stroke="#d1d5db"
                       strokeWidth="1"
                       rx="4"
@@ -248,8 +240,8 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
                       x={x + 5}
                       y={y + 13}
                       fontSize="10"
-                      fill={ZONE_COLORS[zoneStr]}
-                      opacity={0.7}
+                      fill="white"
+                      opacity={0.6}
                       fontWeight="600"
                     >
                       {zoneStr}
