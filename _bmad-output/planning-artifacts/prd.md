@@ -424,10 +424,10 @@ L'implémentation suit un ordre logique de dépendances techniques, pas un déco
 - **FR2:** Le spécialiste peut définir l'unité d'analyse comme une combinaison TÂCHE × PÉRIODE et créer au moins 2-3 analyses par poste pour capturer les variations par période (jour, nuit, weekend)
 - **FR3:** Le spécialiste peut répondre à une checklist de 14 catégories de travaux réglementés avec les références légales associées (Gate Niveau 1)
 - **FR4:** Le système stoppe l'analyse avec un motif légal précis si un travail réglementé est coché ou si le personnel est mineur (Gate NO-GO)
-- **FR5:** Le spécialiste peut évaluer la gravité du dommage (I à V) via des questions intermédiaires en langage naturel sans manipuler les codes techniques
+- **FR5:** Le spécialiste peut évaluer la gravité du dommage (I à V) via des questions intermédiaires en langage naturel sans manipuler les codes techniques. Chaque niveau de gravité est illustré par des exemples concrets de blessures typiques pour aider l'utilisateur dans son choix
 - **FR6:** Le spécialiste peut évaluer la probabilité d'accident (A à E) via des questions intermédiaires en langage naturel sans manipuler les codes techniques
 - **FR7:** Le système calcule la zone de risque (1 à 4) à partir de la matrice SUVA 5×5 (Gate Niveau 2)
-- **FR8:** Le spécialiste peut vérifier les aptitudes du travailleur selon 3 dimensions : psychique, physique, intellectuelle
+- **FR8:** Le spécialiste peut vérifier les aptitudes du travailleur selon 3 dimensions : psychique, physique, intellectuelle. Les aptitudes ne sont PAS cochées par défaut — chaque aptitude doit être évaluée activement. L'interface affiche une mention rappelant que l'évaluation des aptitudes relève de la responsabilité du cadre hiérarchique et doit être réalisée régulièrement
 - **FR9:** Le spécialiste peut décrire le danger identifié via un champ texte structuré (150-300 caractères) avec une liste déroulante de catégories de dangers prédéfinies par type de travail réglementé
 - **FR10:** Le spécialiste peut saisir les conditions opérationnelles : couverture réseau, équipements DATI, centrale d'alarme, délais de secouristes (jour/nuit), délais secours publics
 - **FR11:** Le système calcule le t_max par période et détermine la faisabilité du sauvetage (Gate Niveau 3)

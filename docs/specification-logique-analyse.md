@@ -168,6 +168,22 @@ CONCEPT DE SAUVETAGE : À élaborer obligatoirement avec un spécialiste MSST.
 
 Déterminer la zone de base selon la probabilité d'accident et la gravité du dommage prévisible. Ce résultat est la zone minimale — elle ne peut qu'être maintenue ou renforcée par les niveaux suivants.
 
+### 4.0 Vérification des aptitudes du travailleur (ch. 3 SUVA)
+
+Avant d'entrer dans la matrice des risques, vérifier les aptitudes du travailleur selon 3 dimensions.
+
+**Comportement par défaut :** Les 3 aptitudes sont **NON COCHÉES** à l'ouverture du formulaire. Chaque aptitude doit être évaluée activement par le cadre ou le spécialiste. Aucune présomption d'aptitude.
+
+**Mention obligatoire affichée dans l'interface :**
+
+> **Responsabilité du cadre hiérarchique** — L'évaluation des aptitudes du travailleur relève de la responsabilité du cadre hiérarchique (ch. 3 SUVA 44094.F). Cette évaluation doit être réalisée régulièrement et actualisée en cas de changement de situation du travailleur (état de santé, nouveau traitement médical, changement de poste, incident, etc.).
+
+**Valeurs possibles pour chaque aptitude :** OK / AVEC_RESERVES / NON_APTE
+
+- **OK** : aucune contre-indication identifiée
+- **AVEC_RESERVES** : aptitude confirmée sous conditions (champ texte libre pour préciser les réserves)
+- **NON_APTE** : contre-indication identifiée → avertissement non bloquant dans le rapport
+
 ### 4.1 Identification du danger principal
 
 Demander à l'utilisateur de décrire en langage libre le danger le plus grave identifié pour cette tâche. Exemples guidants selon le contexte :
@@ -187,13 +203,13 @@ Demander à l'utilisateur de décrire en langage libre le danger le plus grave i
 
 Sélectionner le niveau de gravité probable pour le danger identifié, en l'absence de premiers secours immédiats.
 
-| Code | Libellé | Description | Exemples |
-|------|---------|-------------|----------|
-| I | TRÈS GRAVE | Blessure mortelle ou mettant la vie en danger sans secours immédiats | Chute de plus de 3m sur sol dur, électrocution HT, asphyxie en espace confiné |
-| II | GRAVE | Blessure grave avec atteinte irréversible (séquelle permanente) | Fracture du crâne, amputation, perte de conscience prolongée, chute de 1-3m sur sol dur |
-| III | MOYEN | Blessure moyenne avec atteinte irréversible | Fracture complexe, lésion articulaire irréversible, brûlure étendue |
-| IV | FAIBLE | Blessure avec arrêt de travail sans atteinte irréversible | Fracture simple, entorse grave, plaie profonde, commotion cérébrale légère |
-| V | TRÈS FAIBLE | Blessure légère sans arrêt de travail | Contusion, égratignure, entorse légère, foulure de poignet |
+| Code | Libellé | Description | Exemples concrets |
+|------|---------|-------------|-------------------|
+| I | TRÈS GRAVE (Mortelle) | Risque de décès en l'absence de premiers secours immédiats | Chute de grande hauteur (>3m) sur sol dur, électrocution haute tension, ensevelissement, noyade, asphyxie en espace confiné, intoxication par gaz mortel, écrasement par machine |
+| II | GRAVE (Invalidité) | Invalidité permanente possible — blessure grave avec atteinte irréversible | Amputation d'un membre, lésion médullaire (paralysie), perte de la vue, traumatisme crânien sévère, brûlures étendues au 3e degré, chute de 1-3m sur sol dur |
+| III | MOYEN (Arrêt prolongé) | Blessure grave avec arrêt de travail prolongé | Fracture ouverte ou complexe, luxation grave, brûlure au 2e degré étendue, blessure au dos avec hernie discale, lésion articulaire irréversible, entorse grave avec ligaments déchirés |
+| IV | FAIBLE (Arrêt court) | Blessure nécessitant un traitement médical avec arrêt de travail temporaire | Fracture simple (doigt, poignet), entorse modérée, coupure nécessitant des points de suture, brûlure localisée au 1er-2e degré, commotion cérébrale légère |
+| V | TRÈS FAIBLE (Légère) | Blessure légère, premiers soins suffisants — pas d'arrêt de travail | Écorchure, petite coupure superficielle, contusion légère, piqûre d'insecte sans allergie, entorse légère, courbature musculaire, foulure de poignet |
 
 ### 4.3 Probabilité d'accident [SUVA_CONST] — Estimation guidée par questionnaire
 

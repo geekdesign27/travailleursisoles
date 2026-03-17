@@ -177,6 +177,10 @@ Checklist de 13 catégories de travaux réglementés (ch. 9 SUVA). Si au moins u
 
 Vérification des aptitudes selon ch. 3 SUVA. 3 blocs : Psychique / Physique / Intellectuelle.
 
+**⚠️ Comportement par défaut :** Les 3 aptitudes ne sont **PAS cochées par défaut**. Le cadre ou le spécialiste doit évaluer activement chaque aptitude avant de la valider. Aucune aptitude ne doit être présumée acquise sans vérification explicite.
+
+**📋 Responsabilité du cadre :** Il est de la responsabilité du cadre hiérarchique d'évaluer régulièrement les aptitudes du travailleur (ch. 3 SUVA). Cette évaluation doit être actualisée lors de chaque révision de l'analyse ou en cas de changement de situation du travailleur (état de santé, nouveau traitement médical, changement de poste, etc.). Une mention visible dans l'interface rappelle cette obligation.
+
 **Aptitudes psychiques — contre-indications :**
 - Manque d'assurance même en travail collectif
 - Angoisses fréquentes en situation de solitude
@@ -201,13 +205,13 @@ Description libre du danger le plus grave identifié avec aides contextuelles.
 
 #### ÉTAPE 5 — Matrice des risques : Gravité du dommage
 
-| Code | Libellé | Description |
-|------|---------|-------------|
-| I | Très grave | Blessure mortelle en l'absence de premiers secours immédiats |
-| II | Grave | Blessure grave avec atteinte irréversible |
-| III | Moyen | Blessure moyenne avec atteinte irréversible |
-| IV | Faible | Blessure avec arrêt de travail sans atteinte irréversible |
-| V | Très faible | Blessure légère sans arrêt de travail |
+| Code | Libellé | Description | Exemples concrets |
+|------|---------|-------------|-------------------|
+| I | Très grave (Mortelle) | Risque de décès en l'absence de premiers secours immédiats | Chute de grande hauteur (>3m), électrocution haute tension, ensevelissement, noyade, intoxication par gaz mortel, écrasement par machine |
+| II | Grave (Invalidité) | Invalidité permanente possible — blessure grave avec atteinte irréversible | Amputation d'un membre, lésion médullaire (paralysie), perte de la vue, traumatisme crânien sévère, brûlures étendues au 3e degré |
+| III | Moyen (Arrêt prolongé) | Blessure grave avec arrêt de travail prolongé | Fracture ouverte, luxation grave, brûlure au 2e degré étendue, blessure au dos avec hernie discale, entorse grave avec ligaments déchirés |
+| IV | Faible (Arrêt court) | Blessure nécessitant un traitement médical avec arrêt de travail temporaire | Fracture simple (doigt, poignet), entorse modérée, coupure nécessitant des points de suture, brûlure localisée au 1er-2e degré |
+| V | Très faible (Légère) | Blessure légère, premiers soins suffisants — pas d'arrêt de travail | Écorchure, petite coupure superficielle, contusion légère, piqûre d'insecte sans allergie, courbature musculaire |
 
 #### ÉTAPE 6 — Matrice des risques : Probabilité d'accident
 
