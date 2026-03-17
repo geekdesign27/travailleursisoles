@@ -42,6 +42,15 @@ export function Step02Level1Gate() {
     }
   }, [state.current, id, dispatch, navigate]);
 
+  // Restore local state from saved data
+  useEffect(() => {
+    if (state.current?.level1Result) {
+      const r = state.current.level1Result;
+      setCheckedCategories(r.checkedCategories);
+      setIsMinor(r.isMinor);
+    }
+  }, [state.current?.level1Result]);
+
   // Re-evaluate gate whenever selections change
   useEffect(() => {
     const result = evaluateLevel1Gate(checkedCategories, isMinor);
@@ -72,9 +81,9 @@ export function Step02Level1Gate() {
       currentStep: 2,
       currentLevel: 1,
       level1Result: {
-        blocked: false,
-        checkedCategories: [],
-        isMinor: false,
+        blocked: gateResult.blocked,
+        checkedCategories,
+        isMinor,
       },
       updatedAt: new Date().toISOString(),
     };

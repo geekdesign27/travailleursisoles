@@ -115,6 +115,21 @@ export function Step04Level3Rescue() {
     }
   }, [state.current, id, dispatch, navigate]);
 
+  // Restore local state from saved data
+  useEffect(() => {
+    if (state.current?.level3Result) {
+      const r = state.current.level3Result;
+      const oc = r.operationalConditions;
+      setCouvertureReseau(oc.couvertureReseau);
+      setEquipementDATI(oc.equipementDATI);
+      setCentraleAlarme(oc.centraleAlarme);
+      setDelaiSecouristesJour(oc.delaiSecouristesJour);
+      setDelaiSecouristesNuit(oc.delaiSecouristesNuit);
+      setDelaiAmbulance(oc.delaiAmbulance);
+      setTempsSauvetage(oc.tempsSauvetage);
+    }
+  }, [state.current?.level3Result]);
+
   // Current zone and gravity from level 2 result
   const currentZone = state.current?.level2Result?.zone;
   const currentGravity = state.current?.level2Result?.gravity;
