@@ -220,7 +220,7 @@ export function validateAlertTool(
   // Zone 3a / 3b
   if (zone === "3a" || zone === "3b") {
     // Zone 3 + any coverage + C1: compatible
-    if (cognitiveLoad === "C1" && !isLowCoverage && coverage !== "aucune") {
+    if (cognitiveLoad === "C1" && !isLowCoverage) {
       return {
         compatible: true,
         status: "compatible",
@@ -242,7 +242,7 @@ export function validateAlertTool(
     }
 
     // Zone 3 + C1 + low/no coverage: with_reserves
-    if (cognitiveLoad === "C1" && (isLowCoverage || coverage === "aucune")) {
+    if (cognitiveLoad === "C1" && isLowCoverage) {
       return {
         compatible: true,
         status: "with_reserves",
@@ -256,7 +256,7 @@ export function validateAlertTool(
     }
 
     // Zone 3 + C2 + low/no coverage: with_reserves
-    if (cognitiveLoad === "C2" && (isLowCoverage || coverage === "aucune")) {
+    if (cognitiveLoad === "C2" && isLowCoverage) {
       return {
         compatible: true,
         status: "with_reserves",
@@ -275,7 +275,7 @@ export function validateAlertTool(
         "Utiliser un dispositif avec détection automatique (PTI, homme-mort).",
         "Mettre en place des rondes de contrôle régulières.",
       ];
-      if (isLowCoverage || coverage === "aucune") {
+      if (isLowCoverage) {
         measures.push(
           "La couverture réseau est insuffisante. Prévoir un moyen d'alerte de secours (radio, satellite).",
         );

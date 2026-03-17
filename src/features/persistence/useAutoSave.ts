@@ -37,7 +37,9 @@ export function useAutoSave(): void {
   }, [location.pathname, state, dispatch]);
 }
 
-function performSave(analysis: NonNullable<typeof analysis>): void {
+function performSave(
+  analysis: import("@/types/analysis.schema").Analysis,
+): void {
   try {
     const result = saveAnalysis(analysis);
     if (result.ok) {

@@ -14,6 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAnalysis } from "@/contexts/AnalysisContext";
+import { HelpTooltip } from "@/components/shared/HelpTooltip";
+import { HELP_CONTENT } from "@/constants/helpContent";
 import { saveAnalysis } from "@/features/persistence/localStorageService";
 import {
   AnalysisIdentificationSchema,
@@ -123,7 +125,10 @@ export function Step01Identification() {
         >
           {/* Entreprise */}
           <div className="space-y-2">
-            <Label htmlFor="entreprise">Entreprise *</Label>
+            <Label htmlFor="entreprise">
+              Entreprise *
+              <HelpTooltip {...HELP_CONTENT.entreprise} fieldId="entreprise" />
+            </Label>
             <Input
               id="entreprise"
               {...register("entreprise")}
@@ -142,7 +147,13 @@ export function Step01Identification() {
 
           {/* Département */}
           <div className="space-y-2">
-            <Label htmlFor="departement">Département</Label>
+            <Label htmlFor="departement">
+              Département
+              <HelpTooltip
+                {...HELP_CONTENT.departement}
+                fieldId="departement"
+              />
+            </Label>
             <Input
               id="departement"
               {...register("departement")}
@@ -152,7 +163,13 @@ export function Step01Identification() {
 
           {/* Responsable */}
           <div className="space-y-2">
-            <Label htmlFor="responsable">Responsable *</Label>
+            <Label htmlFor="responsable">
+              Responsable *
+              <HelpTooltip
+                {...HELP_CONTENT.responsable}
+                fieldId="responsable"
+              />
+            </Label>
             <Input
               id="responsable"
               {...register("responsable")}
@@ -171,7 +188,13 @@ export function Step01Identification() {
 
           {/* Titre activité */}
           <div className="space-y-2">
-            <Label htmlFor="titre_activite">Titre de l'activité *</Label>
+            <Label htmlFor="titre_activite">
+              Titre de l'activité *
+              <HelpTooltip
+                {...HELP_CONTENT.titre_activite}
+                fieldId="titre_activite"
+              />
+            </Label>
             <Input
               id="titre_activite"
               {...register("titre_activite")}
@@ -190,7 +213,13 @@ export function Step01Identification() {
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">
+              Description
+              <HelpTooltip
+                {...HELP_CONTENT.description}
+                fieldId="description"
+              />
+            </Label>
             <textarea
               id="description"
               {...register("description")}
@@ -203,6 +232,10 @@ export function Step01Identification() {
           <div className="space-y-2">
             <Label htmlFor="nombre_personnes">
               Nombre de personnes concernées *
+              <HelpTooltip
+                {...HELP_CONTENT.nombre_personnes}
+                fieldId="nombre_personnes"
+              />
             </Label>
             <Input
               id="nombre_personnes"
@@ -224,7 +257,13 @@ export function Step01Identification() {
 
           {/* Période de travail */}
           <div className="space-y-2">
-            <Label htmlFor="periode_travail">Période de travail *</Label>
+            <Label htmlFor="periode_travail">
+              Période de travail *
+              <HelpTooltip
+                {...HELP_CONTENT.periode_travail}
+                fieldId="periode_travail"
+              />
+            </Label>
             <Select
               defaultValue="jour"
               onValueChange={(value) => {
@@ -257,6 +296,10 @@ export function Step01Identification() {
           <div className="space-y-2">
             <Label htmlFor="frequence_activite">
               Fréquence d'activité isolée *
+              <HelpTooltip
+                {...HELP_CONTENT.frequence_activite}
+                fieldId="frequence_activite"
+              />
             </Label>
             <Select
               defaultValue="quotidienne"

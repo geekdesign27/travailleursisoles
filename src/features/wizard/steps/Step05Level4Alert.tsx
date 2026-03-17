@@ -11,6 +11,8 @@ import {
 import { validateAlertTool } from "@/features/engine/alertValidator";
 import type { AlertValidationResult } from "@/features/engine/alertValidator";
 import { GateAlert } from "@/components/shared/GateAlert";
+import { HelpTooltip } from "@/components/shared/HelpTooltip";
+import { HELP_CONTENT } from "@/constants/helpContent";
 import { ZoneBadge } from "@/components/shared/ZoneBadge";
 import { WizardNavigation } from "../WizardNavigation";
 import {
@@ -156,8 +158,12 @@ export function Step05Level4Alert() {
       <CardContent className="space-y-8">
         {/* Section A: Cognitive load evaluation */}
         <fieldset className="space-y-4">
-          <legend className="mb-1 text-base font-medium">
+          <legend className="mb-1 flex items-center gap-2 text-base font-medium">
             Évaluation de la charge cognitive
+            <HelpTooltip
+              {...HELP_CONTENT.charge_cognitive}
+              fieldId="charge_cognitive"
+            />
           </legend>
           <p className="text-sm text-muted-foreground">
             Sélectionnez la description qui correspond le mieux à l'activité du
@@ -205,8 +211,12 @@ export function Step05Level4Alert() {
 
         {/* Section B: DATI equipment selection */}
         <fieldset className="space-y-4">
-          <legend className="mb-1 text-base font-medium">
+          <legend className="mb-1 flex items-center gap-2 text-base font-medium">
             Équipement DATI
+            <HelpTooltip
+              {...HELP_CONTENT.equipment_type}
+              fieldId="equipment_type"
+            />
           </legend>
           <p className="text-sm text-muted-foreground">
             Sélectionnez le type de dispositif d'alerte utilisé ou prévu.
@@ -306,8 +316,12 @@ export function Step05Level4Alert() {
         {/* Section D: Corrective measures */}
         {validationResult && validationResult.status !== "compatible" && (
           <fieldset className="space-y-4">
-            <legend className="mb-1 text-base font-medium">
+            <legend className="mb-1 flex items-center gap-2 text-base font-medium">
               Mesures correctives
+              <HelpTooltip
+                {...HELP_CONTENT.corrective_measures}
+                fieldId="corrective_measures"
+              />
             </legend>
             <p className="text-sm text-muted-foreground">
               Documentez les mesures correctives prévues ou mises en place par

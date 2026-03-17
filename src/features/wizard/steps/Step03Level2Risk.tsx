@@ -20,6 +20,8 @@ import {
   type DangerCategoryType,
 } from "@/types/analysis.schema";
 import { GateAlert } from "@/components/shared/GateAlert";
+import { HelpTooltip } from "@/components/shared/HelpTooltip";
+import { HELP_CONTENT } from "@/constants/helpContent";
 import { RiskMatrix } from "@/components/shared/RiskMatrix";
 import { ZoneBadge } from "@/components/shared/ZoneBadge";
 import { WizardNavigation } from "../WizardNavigation";
@@ -211,7 +213,13 @@ export function Step03Level2Risk() {
                 className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-input accent-suva-primary"
               />
               <div className="flex-1">
-                <span className="text-sm font-medium">{aptitude.label}</span>
+                <span className="flex items-center gap-1.5 text-sm font-medium">
+                  {aptitude.label}
+                  <HelpTooltip
+                    {...HELP_CONTENT[`aptitude_${aptitude.id}`]}
+                    fieldId={`aptitude_${aptitude.id}`}
+                  />
+                </span>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {aptitude.desc}
                 </p>
@@ -233,8 +241,9 @@ export function Step03Level2Risk() {
         {/* Section B: Gravity evaluation */}
         {aptitudeResult.allValid && (
           <fieldset className="space-y-3">
-            <legend className="mb-1 text-base font-medium">
+            <legend className="mb-1 flex items-center gap-2 text-base font-medium">
               Gravité maximale du dommage possible
+              <HelpTooltip {...HELP_CONTENT.gravite} fieldId="gravite" />
             </legend>
             <p className="text-sm text-muted-foreground">
               Quelle est la gravité maximale du dommage que pourrait subir le
@@ -269,8 +278,12 @@ export function Step03Level2Risk() {
         {/* Section C: Probability evaluation */}
         {aptitudeResult.allValid && gravity && (
           <fieldset className="space-y-3">
-            <legend className="mb-1 text-base font-medium">
+            <legend className="mb-1 flex items-center gap-2 text-base font-medium">
               Probabilité de survenance
+              <HelpTooltip
+                {...HELP_CONTENT.probabilite}
+                fieldId="probabilite"
+              />
             </legend>
             <p className="text-sm text-muted-foreground">
               Quelle est la probabilité que cet événement dangereux survienne
@@ -352,8 +365,12 @@ export function Step03Level2Risk() {
         {/* Section E: Danger description */}
         {aptitudeResult.allValid && level2Result && !level2Result.blocked && (
           <fieldset className="space-y-4">
-            <legend className="mb-1 text-base font-medium">
+            <legend className="mb-1 flex items-center gap-2 text-base font-medium">
               Description du danger
+              <HelpTooltip
+                {...HELP_CONTENT.danger_description}
+                fieldId="danger_description"
+              />
             </legend>
 
             <div className="space-y-2">
@@ -381,7 +398,13 @@ export function Step03Level2Risk() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="danger-category">Catégorie de danger</Label>
+              <Label htmlFor="danger-category">
+                Catégorie de danger
+                <HelpTooltip
+                  {...HELP_CONTENT.danger_category}
+                  fieldId="danger_category"
+                />
+              </Label>
               <select
                 id="danger-category"
                 value={dangerCategory}

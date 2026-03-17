@@ -11,6 +11,8 @@ import {
   type GateResult,
 } from "@/features/engine/gateEvaluator";
 import { GateAlert } from "@/components/shared/GateAlert";
+import { HelpTooltip } from "@/components/shared/HelpTooltip";
+import { HELP_CONTENT } from "@/constants/helpContent";
 import { WizardNavigation } from "../WizardNavigation";
 
 export function Step02Level1Gate() {
@@ -110,8 +112,12 @@ export function Step02Level1Gate() {
       <CardContent className="space-y-6">
         {/* Regulated work categories */}
         <fieldset>
-          <legend className="mb-3 text-base font-medium">
+          <legend className="mb-3 flex items-center gap-2 text-base font-medium">
             Travaux réglementés
+            <HelpTooltip
+              {...HELP_CONTENT.travaux_reglementes}
+              fieldId="travaux_reglementes"
+            />
           </legend>
           <div className="space-y-3">
             {REGULATED_WORK_CATEGORIES.filter((c) => c.id !== 8).map(
@@ -149,8 +155,12 @@ export function Step02Level1Gate() {
 
         {/* Minor worker */}
         <fieldset>
-          <legend className="mb-3 text-base font-medium">
+          <legend className="mb-3 flex items-center gap-2 text-base font-medium">
             Personnel mineur
+            <HelpTooltip
+              {...HELP_CONTENT.personnel_mineur}
+              fieldId="personnel_mineur"
+            />
           </legend>
           <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3 transition-colors hover:bg-muted/50">
             <input

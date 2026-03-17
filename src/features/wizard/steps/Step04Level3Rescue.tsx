@@ -13,6 +13,8 @@ import {
   evaluateLevel3,
 } from "@/features/engine/tmaxCalculator";
 import { GateAlert } from "@/components/shared/GateAlert";
+import { HelpTooltip } from "@/components/shared/HelpTooltip";
+import { HELP_CONTENT } from "@/constants/helpContent";
 import { ZoneBadge } from "@/components/shared/ZoneBadge";
 import { WizardNavigation } from "../WizardNavigation";
 import {
@@ -258,7 +260,13 @@ export function Step04Level3Rescue() {
           </legend>
 
           <div className="space-y-1">
-            <Label htmlFor="couverture-reseau">Couverture réseau</Label>
+            <Label htmlFor="couverture-reseau">
+              Couverture réseau
+              <HelpTooltip
+                {...HELP_CONTENT.couverture_reseau}
+                fieldId="couverture_reseau"
+              />
+            </Label>
             <select
               id="couverture-reseau"
               value={couvertureReseau}
@@ -277,7 +285,13 @@ export function Step04Level3Rescue() {
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="equipement-dati">Équipement DATI</Label>
+            <Label htmlFor="equipement-dati">
+              Équipement DATI
+              <HelpTooltip
+                {...HELP_CONTENT.equipement_dati}
+                fieldId="equipement_dati"
+              />
+            </Label>
             <input
               id="equipement-dati"
               type="text"
@@ -290,7 +304,13 @@ export function Step04Level3Rescue() {
           </div>
 
           <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">Centrale d'alarme</legend>
+            <legend className="flex items-center gap-2 text-sm font-medium">
+              Centrale d'alarme
+              <HelpTooltip
+                {...HELP_CONTENT.centrale_alarme}
+                fieldId="centrale_alarme"
+              />
+            </legend>
             <div className="flex gap-4">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
@@ -318,8 +338,12 @@ export function Step04Level3Rescue() {
 
         {/* Section B: Rescue delays */}
         <fieldset className="space-y-4">
-          <legend className="mb-1 text-base font-medium">
+          <legend className="mb-1 flex items-center gap-2 text-base font-medium">
             Délais de secours (en minutes)
+            <HelpTooltip
+              {...HELP_CONTENT.delai_secouristes}
+              fieldId="delai_secouristes"
+            />
           </legend>
           <p className="text-sm text-muted-foreground">
             Indiquez les délais estimés pour chaque étape de la chaîne de

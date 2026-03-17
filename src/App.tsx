@@ -7,6 +7,8 @@ import {
 } from "react-router";
 import { useCallback } from "react";
 import { AnalysisProvider } from "@/contexts/AnalysisContext";
+import { ConfigProvider } from "@/contexts/ConfigContext";
+import { GoogleSheetsProvider } from "@/contexts/GoogleSheetsContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/shared/AppLayout";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
@@ -19,6 +21,9 @@ import { Step04Level3Rescue } from "@/features/wizard/steps/Step04Level3Rescue";
 import { Step05Level4Alert } from "@/features/wizard/steps/Step05Level4Alert";
 import { Step06Documentation } from "@/features/wizard/steps/Step06Documentation";
 import { Step07Finalisation } from "@/features/wizard/steps/Step07Finalisation";
+import { ReportPage } from "@/features/report/ReportPage";
+import { ConfigPage } from "@/features/config/ConfigPage";
+import { OnboardingPage } from "@/features/help/OnboardingPage";
 
 // Map step IDs to route segments
 const STEP_ROUTES: Record<number, string> = {
@@ -124,49 +129,56 @@ function PlaceholderPage({ title }: { title: string }) {
 
 export default function App() {
   return (
-    <AnalysisProvider>
-      <TooltipProvider>
-        <BrowserRouter basename="/travailleursisoles">
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/analysis/new" element={<WizardNewAnalysis />} />
-              <Route
-                path="/analysis/:id"
-                element={<PlaceholderPage title="Résumé de l'analyse" />}
-              />
-              <Route path="/analysis/:id/level-1" element={<WizardLevel1 />} />
-              <Route path="/analysis/:id/level-2" element={<WizardLevel2 />} />
-              <Route path="/analysis/:id/level-3" element={<WizardLevel3 />} />
-              <Route path="/analysis/:id/level-4" element={<WizardLevel4 />} />
-              <Route
-                path="/analysis/:id/level-5"
-                element={<WizardDocumentation />}
-              />
-              <Route
-                path="/analysis/:id/finalisation"
-                element={<WizardFinalisation />}
-              />
-              <Route
-                path="/analysis/:id/level-:level"
-                element={<PlaceholderPage title="Wizard — Niveau" />}
-              />
-              <Route
-                path="/analysis/:id/report"
-                element={<PlaceholderPage title="Rapport" />}
-              />
-              <Route
-                path="/config"
-                element={<PlaceholderPage title="Configuration" />}
-              />
-              <Route
-                path="/onboarding"
-                element={<PlaceholderPage title="Onboarding" />}
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AnalysisProvider>
+    <ConfigProvider>
+      <GoogleSheetsProvider>
+        <AnalysisProvider>
+          <TooltipProvider>
+            <BrowserRouter basename="/travailleursisoles">
+              <Routes>
+                <Route element={<AppLayout />}>
+                  <Route path="/" element={<DashboardPage />} />
+                  <Route path="/analysis/new" element={<WizardNewAnalysis />} />
+                  <Route
+                    path="/analysis/:id"
+                    element={<PlaceholderPage title="Résumé de l'analyse" />}
+                  />
+                  <Route
+                    path="/analysis/:id/level-1"
+                    element={<WizardLevel1 />}
+                  />
+                  <Route
+                    path="/analysis/:id/level-2"
+                    element={<WizardLevel2 />}
+                  />
+                  <Route
+                    path="/analysis/:id/level-3"
+                    element={<WizardLevel3 />}
+                  />
+                  <Route
+                    path="/analysis/:id/level-4"
+                    element={<WizardLevel4 />}
+                  />
+                  <Route
+                    path="/analysis/:id/level-5"
+                    element={<WizardDocumentation />}
+                  />
+                  <Route
+                    path="/analysis/:id/finalisation"
+                    element={<WizardFinalisation />}
+                  />
+                  <Route
+                    path="/analysis/:id/level-:level"
+                    element={<PlaceholderPage title="Wizard — Niveau" />}
+                  />
+                  <Route path="/analysis/:id/report" element={<ReportPage />} />
+                  <Route path="/config" element={<ConfigPage />} />
+                  <Route path="/onboarding" element={<OnboardingPage />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AnalysisProvider>
+      </GoogleSheetsProvider>
+    </ConfigProvider>
   );
 }
