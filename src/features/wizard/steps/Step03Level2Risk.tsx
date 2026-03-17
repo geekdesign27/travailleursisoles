@@ -72,6 +72,20 @@ export function Step03Level2Risk() {
     }
   }, [state.current, id, dispatch, navigate]);
 
+  // Restore local state from saved data
+  useEffect(() => {
+    if (state.current?.level2Result) {
+      const r = state.current.level2Result;
+      setPsychique(r.aptitudes.psychique);
+      setPhysique(r.aptitudes.physique);
+      setIntellectuelle(r.aptitudes.intellectuelle);
+      setGravity(r.gravity);
+      setProbability(r.probability);
+      setDangerDescription(r.dangerDescription ?? "");
+      setDangerCategory(r.dangerCategory ?? "");
+    }
+  }, [state.current?.level2Result]);
+
   // Derived evaluations
   const aptitudeResult = useMemo(
     () => evaluateAptitudes(psychique, physique, intellectuelle),
