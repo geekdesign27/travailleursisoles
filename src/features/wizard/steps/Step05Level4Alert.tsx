@@ -90,7 +90,16 @@ export function Step05Level4Alert() {
   }, [navigate, id]);
 
   const handleNext = useCallback(() => {
-    if (!state.current || !validationResult || !isFormComplete) return;
+    if (!state.current || !isFormComplete) return;
+
+    // Build validation result — may be null if zone/coverage unavailable
+    const finalValidationResult = validationResult ?? {
+      compatible: true,
+      status: "compatible" as const,
+      measures: [],
+      reason:
+        "Validation automatique non disponible (données de zone manquantes). Vérifier manuellement.",
+    };
 
     const updated = {
       ...state.current,
@@ -99,7 +108,7 @@ export function Step05Level4Alert() {
       level4Result: {
         cognitiveLoad: cognitiveLoad as CognitiveLoadLevel,
         equipmentType,
-        validationResult,
+        validationResult: finalValidationResult,
         correctiveMeasures,
       },
       updatedAt: new Date().toISOString(),
@@ -351,7 +360,7 @@ export function Step05Level4Alert() {
         <WizardNavigation
           onNext={handleNext}
           onPrevious={handlePrevious}
-          nextDisabled={!isFormComplete || !validationResult}
+          nextDisabled={!isFormComplete}
           nextLabel="Suivant"
         />
       </CardContent>
