@@ -209,7 +209,7 @@ Description libre du danger le plus grave identifié avec aides contextuelles.
 |------|---------|-------------|-------------------|
 | I | Très grave (Mortelle) | Risque de décès en l'absence de premiers secours immédiats | Chute de grande hauteur (>3m), électrocution haute tension, ensevelissement, noyade, intoxication par gaz mortel, écrasement par machine |
 | II | Grave (Invalidité) | Invalidité permanente possible — blessure grave avec atteinte irréversible | Amputation d'un membre, lésion médullaire (paralysie), perte de la vue, traumatisme crânien sévère, brûlures étendues au 3e degré |
-| III | Moyen (Arrêt prolongé) | Blessure grave avec arrêt de travail prolongé | Fracture ouverte, luxation grave, brûlure au 2e degré étendue, blessure au dos avec hernie discale, entorse grave avec ligaments déchirés |
+| III | Moyen (Arrêt prolongé) | Blessure grave avec arrêt de travail prolongé | Fracture ouverte, luxation grave, brûlure au 2e degré étendue, lésion dorsale traumatique (tassement vertébral), entorse grave avec ligaments déchirés |
 | IV | Faible (Arrêt court) | Blessure nécessitant un traitement médical avec arrêt de travail temporaire | Fracture simple (doigt, poignet), entorse modérée, coupure nécessitant des points de suture, brûlure localisée au 1er-2e degré |
 | V | Très faible (Légère) | Blessure légère, premiers soins suffisants — pas d'arrêt de travail | Écorchure, petite coupure superficielle, contusion légère, piqûre d'insecte sans allergie, courbature musculaire |
 

@@ -207,7 +207,7 @@ Sélectionner le niveau de gravité probable pour le danger identifié, en l'abs
 |------|---------|-------------|-------------------|
 | I | TRÈS GRAVE (Mortelle) | Risque de décès en l'absence de premiers secours immédiats | Chute de grande hauteur (>3m) sur sol dur, électrocution haute tension, ensevelissement, noyade, asphyxie en espace confiné, intoxication par gaz mortel, écrasement par machine |
 | II | GRAVE (Invalidité) | Invalidité permanente possible — blessure grave avec atteinte irréversible | Amputation d'un membre, lésion médullaire (paralysie), perte de la vue, traumatisme crânien sévère, brûlures étendues au 3e degré, chute de 1-3m sur sol dur |
-| III | MOYEN (Arrêt prolongé) | Blessure grave avec arrêt de travail prolongé | Fracture ouverte ou complexe, luxation grave, brûlure au 2e degré étendue, blessure au dos avec hernie discale, lésion articulaire irréversible, entorse grave avec ligaments déchirés |
+| III | MOYEN (Arrêt prolongé) | Blessure grave avec arrêt de travail prolongé | Fracture ouverte ou complexe, luxation grave, brûlure au 2e degré étendue, lésion dorsale traumatique (tassement vertébral), lésion articulaire irréversible, entorse grave avec ligaments déchirés |
 | IV | FAIBLE (Arrêt court) | Blessure nécessitant un traitement médical avec arrêt de travail temporaire | Fracture simple (doigt, poignet), entorse modérée, coupure nécessitant des points de suture, brûlure localisée au 1er-2e degré, commotion cérébrale légère |
 | V | TRÈS FAIBLE (Légère) | Blessure légère, premiers soins suffisants — pas d'arrêt de travail | Écorchure, petite coupure superficielle, contusion légère, piqûre d'insecte sans allergie, entorse légère, courbature musculaire, foulure de poignet |
 
