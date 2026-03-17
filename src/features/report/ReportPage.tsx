@@ -6,6 +6,7 @@ import { ZoneBadge } from "@/components/shared/ZoneBadge";
 import { ArrowLeft } from "lucide-react";
 import type { ZoneRisque } from "@/constants/suvaMatrix";
 import { loadAnalysis } from "@/features/persistence/localStorageService";
+import { useAnalysis } from "@/contexts/AnalysisContext";
 import { getEffectiveZone, formatPeriode } from "./reportGenerator";
 import { ManagementView } from "./ManagementView";
 import { TechnicalView } from "./TechnicalView";
@@ -16,6 +17,7 @@ export function ReportPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const reportRef = useRef<HTMLDivElement>(null);
+  const { state: analysisState } = useAnalysis();
 
   if (!id) {
     return (
@@ -25,7 +27,10 @@ export function ReportPage() {
     );
   }
 
-  const analysis = loadAnalysis(id);
+  // Try context first (loaded from Sheets via dashboard), then localStorage
+  const analysis =
+    (analysisState.current?.id === id ? analysisState.current : null) ??
+    loadAnalysis(id);
 
   if (!analysis) {
     return (
