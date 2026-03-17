@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   SUVA_MATRIX,
   type GravityLevel,
@@ -26,6 +26,12 @@ interface RiskHeatmapProps {
   onAnalysisClick?: (id: string) => void;
 }
 
+interface PopoverState {
+  cellKey: string;
+  x: number;
+  y: number;
+}
+
 // --- Constants ---
 
 const GRAVITY_LABELS: Record<GravityLevel, string> = {
@@ -44,31 +50,36 @@ const PROBABILITY_LABELS: Record<ProbabilityLevel, string> = {
   E: "Très fréquent",
 };
 
+// Vivid zone colors for cell backgrounds
 const ZONE_COLORS: Record<string, string> = {
-  "1": "#dc2626", // red-600
+  "1": "#ef4444", // red-500 vivid
   "2": "#f97316", // orange-500
   "3a": "#eab308", // yellow-500
-  "3b": "#facc15", // yellow-400
+  "3b": "#a3e635", // lime-400
   "4": "#22c55e", // green-500
 };
 
-const ZONE_BG_LIGHT: Record<string, string> = {
-  "1": "#fef2f2", // red-50
-  "2": "#fff7ed", // orange-50
-  "3a": "#fefce8", // yellow-50
-  "3b": "#fefce8", // yellow-50
-  "4": "#f0fdf4", // green-50
+const ZONE_BG: Record<string, string> = {
+  "1": "#fca5a5", // red-300
+  "2": "#fdba74", // orange-300
+  "3a": "#fde047", // yellow-300
+  "3b": "#d9f99d", // lime-200
+  "4": "#86efac", // green-300
 };
+
+// Anthracite for circles
+const CIRCLE_FILL = "#1e293b"; // slate-800
 
 const gravityLevels: GravityLevel[] = ["V", "IV", "III", "II", "I"];
 const probabilityLevels: ProbabilityLevel[] = ["A", "B", "C", "D", "E"];
 
-const CELL_SIZE = 80;
+const CELL_W = 110;
+const CELL_H = 64;
 const LABEL_W = 90;
 const LABEL_H = 36;
 const PADDING = 8;
-const MAX_RADIUS = 30;
-const MIN_RADIUS = 12;
+const MAX_RADIUS = 20;
+const MIN_RADIUS = 9;
 
 // --- Helpers ---
 
@@ -86,7 +97,9 @@ function groupByCell(analyses: HeatmapAnalysis[]) {
 // --- Component ---
 
 export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
-  const [selectedCell, setSelectedCell] = useState<string | null>(null);
+  const [popover, setPopover] = useState<PopoverState | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const cellMap = groupByCell(analyses);
 
   const maxCount = Math.max(
@@ -94,12 +107,40 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
     ...Array.from(cellMap.values()).map((l) => l.length),
   );
 
-  const svgW = LABEL_W + probabilityLevels.length * CELL_SIZE + PADDING;
-  const svgH = LABEL_H + gravityLevels.length * CELL_SIZE + PADDING + 30; // 30 for bottom label
+  const svgW = LABEL_W + probabilityLevels.length * CELL_W + PADDING;
+  const svgH = LABEL_H + gravityLevels.length * CELL_H + PADDING + 24;
 
-  const selectedAnalyses = selectedCell
-    ? (cellMap.get(selectedCell) ?? [])
-    : [];
+  const selectedAnalyses = popover ? (cellMap.get(popover.cellKey) ?? []) : [];
+
+  // Close popover on click outside
+  const handleOutsideClick = useCallback((e: MouseEvent) => {
+    if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+      setPopover(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (popover) {
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () =>
+        document.removeEventListener("mousedown", handleOutsideClick);
+    }
+  }, [popover, handleOutsideClick]);
+
+  function handleCircleClick(cellKey: string, event: React.MouseEvent) {
+    if (popover?.cellKey === cellKey) {
+      setPopover(null);
+      return;
+    }
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    setPopover({
+      cellKey,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  }
 
   return (
     <Card>
@@ -108,17 +149,17 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
           Matrice de risque — Vue d'ensemble
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="overflow-x-auto">
+      <CardContent>
+        <div ref={containerRef} className="relative overflow-x-auto">
           <svg
             viewBox={`0 0 ${svgW} ${svgH}`}
-            className="mx-auto w-full max-w-[550px]"
+            className="mx-auto w-full max-w-[650px]"
             role="img"
             aria-label="Matrice de risque SUVA avec postes analysés"
           >
             {/* Probability headers (columns) */}
             {probabilityLevels.map((p, ci) => {
-              const x = LABEL_W + ci * CELL_SIZE + CELL_SIZE / 2;
+              const x = LABEL_W + ci * CELL_W + CELL_W / 2;
               return (
                 <g key={`ph-${p}`}>
                   <text
@@ -145,7 +186,7 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
 
             {/* Gravity labels (rows) */}
             {gravityLevels.map((g, ri) => {
-              const y = LABEL_H + ri * CELL_SIZE + CELL_SIZE / 2;
+              const y = LABEL_H + ri * CELL_H + CELL_H / 2;
               return (
                 <g key={`gl-${g}`}>
                   <text
@@ -177,11 +218,10 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
                 const zoneStr = String(zone);
                 const cellKey = `${g}-${p}`;
                 const count = cellMap.get(cellKey)?.length ?? 0;
-                const x = LABEL_W + ci * CELL_SIZE;
-                const y = LABEL_H + ri * CELL_SIZE;
-                const cx = x + CELL_SIZE / 2;
-                const cy = y + CELL_SIZE / 2;
-                const isSelected = selectedCell === cellKey;
+                const x = LABEL_W + ci * CELL_W;
+                const y = LABEL_H + ri * CELL_H;
+                const cx = x + CELL_W / 2;
+                const cy = y + CELL_H / 2;
 
                 // Radius proportional to count
                 const radius =
@@ -196,39 +236,41 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
                     <rect
                       x={x}
                       y={y}
-                      width={CELL_SIZE}
-                      height={CELL_SIZE}
-                      fill={ZONE_BG_LIGHT[zoneStr]}
-                      stroke="#e5e7eb"
+                      width={CELL_W}
+                      height={CELL_H}
+                      fill={ZONE_BG[zoneStr]}
+                      stroke="#d1d5db"
                       strokeWidth="1"
                       rx="4"
                     />
                     {/* Zone label (subtle) */}
                     <text
-                      x={x + 6}
-                      y={y + 14}
+                      x={x + 5}
+                      y={y + 13}
                       fontSize="10"
-                      className="fill-muted-foreground/50"
+                      fill={ZONE_COLORS[zoneStr]}
+                      opacity={0.7}
+                      fontWeight="600"
                     >
                       {zoneStr}
                     </text>
 
-                    {/* Bubble */}
+                    {/* Bubble — anthracite with white text */}
                     {count > 0 && (
                       <g
                         className="cursor-pointer"
-                        onClick={() =>
-                          setSelectedCell(isSelected ? null : cellKey)
-                        }
+                        onClick={(e) => handleCircleClick(cellKey, e)}
                       >
                         <circle
                           cx={cx}
                           cy={cy}
                           r={radius}
-                          fill={ZONE_COLORS[zoneStr]}
-                          opacity={isSelected ? 1 : 0.75}
-                          stroke={isSelected ? "#1e293b" : "white"}
-                          strokeWidth={isSelected ? 2.5 : 2}
+                          fill={CIRCLE_FILL}
+                          opacity={popover?.cellKey === cellKey ? 1 : 0.85}
+                          stroke={
+                            popover?.cellKey === cellKey ? "#0ea5e9" : "#475569"
+                          }
+                          strokeWidth={popover?.cellKey === cellKey ? 2.5 : 1.5}
                           className="transition-all duration-200 hover:opacity-100"
                         />
                         <text
@@ -237,7 +279,7 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
                           textAnchor="middle"
                           dominantBaseline="central"
                           fill="white"
-                          fontSize={radius > 20 ? "14" : "11"}
+                          fontSize={radius > 16 ? "13" : "10"}
                           fontWeight="700"
                         >
                           {count}
@@ -251,8 +293,8 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
 
             {/* Axis labels */}
             <text
-              x={LABEL_W + (probabilityLevels.length * CELL_SIZE) / 2}
-              y={LABEL_H + gravityLevels.length * CELL_SIZE + 22}
+              x={LABEL_W + (probabilityLevels.length * CELL_W) / 2}
+              y={LABEL_H + gravityLevels.length * CELL_H + 18}
               textAnchor="middle"
               fontSize="11"
               className="fill-muted-foreground font-medium"
@@ -261,19 +303,82 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
             </text>
             <text
               x={12}
-              y={LABEL_H + (gravityLevels.length * CELL_SIZE) / 2}
+              y={LABEL_H + (gravityLevels.length * CELL_H) / 2}
               textAnchor="middle"
               fontSize="11"
               className="fill-muted-foreground font-medium"
-              transform={`rotate(-90, 12, ${LABEL_H + (gravityLevels.length * CELL_SIZE) / 2})`}
+              transform={`rotate(-90, 12, ${LABEL_H + (gravityLevels.length * CELL_H) / 2})`}
             >
               Gravité →
             </text>
           </svg>
+
+          {/* Popover positioned near clicked circle */}
+          {popover && selectedAnalyses.length > 0 && (
+            <div
+              ref={popoverRef}
+              className="absolute z-50 w-72 rounded-lg border border-border bg-popover p-3 shadow-lg"
+              style={{
+                left: `${popover.x}px`,
+                top: `${popover.y + 12}px`,
+                transform: "translateX(-50%)",
+              }}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-semibold text-foreground">
+                  {selectedAnalyses.length} poste
+                  {selectedAnalyses.length > 1 ? "s" : ""} — G
+                  {popover.cellKey.split("-")[0]} / P
+                  {popover.cellKey.split("-")[1]}
+                </span>
+                <button
+                  onClick={() => setPopover(null)}
+                  className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+              <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+                {selectedAnalyses.map((a) => (
+                  <li key={a.id}>
+                    <button
+                      className="flex w-full items-center justify-between rounded-md border border-border bg-background px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-muted"
+                      onClick={() => onAnalysisClick?.(a.id)}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">
+                          {a.titre_activite}
+                        </span>
+                        <span className="block truncate text-muted-foreground">
+                          {a.entreprise}
+                        </span>
+                      </div>
+                      <Badge
+                        variant={
+                          a.status === "completed"
+                            ? "secondary"
+                            : a.status === "in_progress"
+                              ? "default"
+                              : "outline"
+                        }
+                        className="ml-2 shrink-0"
+                      >
+                        {a.status === "completed"
+                          ? "Terminée"
+                          : a.status === "in_progress"
+                            ? "En cours"
+                            : "Brouillon"}
+                      </Badge>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
           {[
             { zone: "1", label: "Zone 1 — Interdit" },
             { zone: "2", label: "Zone 2 — Surveillance" },
@@ -289,58 +394,6 @@ export function RiskHeatmap({ analyses, onAnalysisClick }: RiskHeatmapProps) {
             </span>
           ))}
         </div>
-
-        {/* Selected cell detail panel */}
-        {selectedCell && selectedAnalyses.length > 0 && (
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">
-                {selectedAnalyses.length} poste
-                {selectedAnalyses.length > 1 ? "s" : ""} — Gravité{" "}
-                {selectedCell.split("-")[0]}, Probabilité{" "}
-                {selectedCell.split("-")[1]}
-              </h3>
-              <button
-                onClick={() => setSelectedCell(null)}
-                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <ul className="space-y-2">
-              {selectedAnalyses.map((a) => (
-                <li key={a.id}>
-                  <button
-                    className="flex w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
-                    onClick={() => onAnalysisClick?.(a.id)}
-                  >
-                    <div>
-                      <span className="font-medium">{a.titre_activite}</span>
-                      <span className="ml-2 text-muted-foreground">
-                        {a.entreprise}
-                      </span>
-                    </div>
-                    <Badge
-                      variant={
-                        a.status === "completed"
-                          ? "secondary"
-                          : a.status === "in_progress"
-                            ? "default"
-                            : "outline"
-                      }
-                    >
-                      {a.status === "completed"
-                        ? "Terminée"
-                        : a.status === "in_progress"
-                          ? "En cours"
-                          : "Brouillon"}
-                    </Badge>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

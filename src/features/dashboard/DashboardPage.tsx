@@ -210,7 +210,7 @@ export function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-8">
+    <main className="mx-auto max-w-7xl px-6 py-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Analyses travailleurs isolés</h1>
