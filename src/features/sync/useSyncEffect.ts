@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { useGoogleSheets } from "@/contexts/GoogleSheetsContext";
-import { getAccessToken } from "@/features/sync/googleAuth";
 import { processQueue, getQueueSize } from "./syncQueue";
 import { toast } from "sonner";
 
@@ -13,13 +12,12 @@ export function useSyncEffect(): void {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const runSync = async () => {
-    const token = getAccessToken();
-    if (!token || !state.spreadsheetId) return;
+    if (!state.configured || !state.spreadsheetId) return;
     if (getQueueSize() === 0) return;
 
     dispatchSync({ type: "SYNC_START" });
     try {
-      const result = await processQueue(token, state.spreadsheetId);
+      const result = await processQueue(state.spreadsheetId);
       if (result.processed > 0) {
         dispatchSync({ type: "SYNC_SUCCESS" });
         toast.success(`${result.processed} analyse(s) synchronisée(s).`);
@@ -41,7 +39,7 @@ export function useSyncEffect(): void {
 
   // Periodic sync
   useEffect(() => {
-    if (!state.auth.isAuthenticated || !state.spreadsheetId) {
+    if (!state.configured || !state.spreadsheetId) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -49,7 +47,7 @@ export function useSyncEffect(): void {
       return;
     }
 
-    // Run immediately on connect
+    // Run immediately on mount
     runSync();
 
     intervalRef.current = setInterval(runSync, SYNC_INTERVAL_MS);
@@ -61,12 +59,12 @@ export function useSyncEffect(): void {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.auth.isAuthenticated, state.spreadsheetId]);
+  }, [state.configured, state.spreadsheetId]);
 
   // Sync on coming back online
   useEffect(() => {
     const handleOnline = () => {
-      if (state.auth.isAuthenticated && state.spreadsheetId) {
+      if (state.configured && state.spreadsheetId) {
         runSync();
       }
     };
@@ -74,5 +72,5 @@ export function useSyncEffect(): void {
     window.addEventListener("online", handleOnline);
     return () => window.removeEventListener("online", handleOnline);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.auth.isAuthenticated, state.spreadsheetId]);
+  }, [state.configured, state.spreadsheetId]);
 }

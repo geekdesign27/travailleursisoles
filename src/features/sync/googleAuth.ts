@@ -1,4 +1,12 @@
-// Google Identity Services OAuth2 authentication service
+// Service Account JWT authentication for Google Sheets API
+// Signs a JWT with the SA private key using Web Crypto, then exchanges it for an access token.
+
+const TOKEN_URI = "https://oauth2.googleapis.com/token";
+const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+const TOKEN_LIFETIME_S = 3600; // 1 hour
+
+let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
 
 export interface GoogleAuthState {
   isAuthenticated: boolean;
@@ -6,129 +14,159 @@ export interface GoogleAuthState {
   error: string | null;
 }
 
-interface TokenResponse {
-  access_token: string;
-  expires_in: number;
-  scope: string;
-  token_type: string;
-}
+function getServiceAccountConfig() {
+  const email = import.meta.env.VITE_SA_CLIENT_EMAIL;
+  const privateKeyBase64 = import.meta.env.VITE_SA_PRIVATE_KEY_B64;
 
-interface TokenClient {
-  requestAccessToken: (config?: { prompt?: string }) => void;
-  callback: (response: TokenResponse & { error?: string }) => void;
-}
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        oauth2: {
-          initTokenClient: (config: {
-            client_id: string;
-            scope: string;
-            callback: (response: TokenResponse & { error?: string }) => void;
-          }) => TokenClient;
-          revoke: (token: string, callback: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
-const GIS_SCRIPT_URL = "https://accounts.google.com/gsi/client";
-
-let tokenClient: TokenClient | null = null;
-let currentToken: string | null = null;
-let gisLoaded = false;
-
-function loadGisScript(): Promise<void> {
-  if (gisLoaded && window.google?.accounts) return Promise.resolve();
-
-  return new Promise((resolve, reject) => {
-    // Check if already loaded
-    if (window.google?.accounts) {
-      gisLoaded = true;
-      resolve();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = GIS_SCRIPT_URL;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      gisLoaded = true;
-      resolve();
-    };
-    script.onerror = () =>
-      reject(new Error("Impossible de charger Google Identity Services."));
-    document.head.appendChild(script);
-  });
-}
-
-export async function initGoogleAuth(): Promise<void> {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  if (!clientId) {
+  if (!email || !privateKeyBase64) {
     throw new Error(
-      "VITE_GOOGLE_CLIENT_ID non configuré. Ajoutez-le dans .env.local.",
+      "Variables VITE_SA_CLIENT_EMAIL et VITE_SA_PRIVATE_KEY_B64 requises dans .env.local.",
     );
   }
 
-  await loadGisScript();
+  // Decode base64-encoded PEM key
+  const privateKeyPem = atob(privateKeyBase64);
 
-  tokenClient = window.google!.accounts.oauth2.initTokenClient({
-    client_id: clientId,
+  return { email, privateKeyPem };
+}
+
+/** Base64url-encode a buffer (no padding). */
+function base64url(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+/** Base64url-encode a string. */
+function base64urlStr(str: string): string {
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/** Parse PEM private key and import as CryptoKey for RS256 signing. */
+async function importPrivateKey(pem: string): Promise<CryptoKey> {
+  const pemContents = pem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s/g, "");
+
+  const binaryDer = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
+
+  return crypto.subtle.importKey(
+    "pkcs8",
+    binaryDer.buffer,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+}
+
+/** Create and sign a JWT for the Google OAuth2 token endpoint. */
+async function createSignedJwt(
+  email: string,
+  privateKeyPem: string,
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+
+  const header = { alg: "RS256", typ: "JWT" };
+  const payload = {
+    iss: email,
     scope: SCOPES,
-    callback: () => {
-      // Will be overridden in signIn()
-    },
-  });
+    aud: TOKEN_URI,
+    iat: now,
+    exp: now + TOKEN_LIFETIME_S,
+  };
+
+  const encodedHeader = base64urlStr(JSON.stringify(header));
+  const encodedPayload = base64urlStr(JSON.stringify(payload));
+  const signingInput = `${encodedHeader}.${encodedPayload}`;
+
+  const key = await importPrivateKey(privateKeyPem);
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(signingInput),
+  );
+
+  return `${signingInput}.${base64url(signature)}`;
 }
 
-export function signIn(): Promise<TokenResponse> {
-  return new Promise((resolve, reject) => {
-    if (!tokenClient) {
-      reject(
-        new Error(
-          "Service d'authentification non initialisé. Appelez initGoogleAuth() d'abord.",
-        ),
-      );
-      return;
-    }
-
-    tokenClient.callback = (response) => {
-      if (response.error) {
-        currentToken = null;
-        reject(new Error(`Erreur d'authentification : ${response.error}`));
-        return;
-      }
-      currentToken = response.access_token;
-      resolve(response);
-    };
-
-    tokenClient.requestAccessToken({ prompt: "consent" });
+/** Exchange a signed JWT for a Google OAuth2 access token. */
+async function exchangeJwtForToken(jwt: string): Promise<string> {
+  const body = new URLSearchParams({
+    grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+    assertion: jwt,
   });
+
+  const response = await fetch(TOKEN_URI, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(
+      `Erreur d'authentification Google (${response.status}): ${text}`,
+    );
+  }
+
+  const data = (await response.json()) as {
+    access_token: string;
+    expires_in: number;
+  };
+  cachedToken = data.access_token;
+  tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000; // Refresh 60s early
+  return data.access_token;
 }
 
-export function signOut(): Promise<void> {
-  return new Promise((resolve) => {
-    if (currentToken && window.google?.accounts) {
-      window.google.accounts.oauth2.revoke(currentToken, () => {
-        currentToken = null;
-        resolve();
-      });
-    } else {
-      currentToken = null;
-      resolve();
-    }
-  });
+/**
+ * Returns a valid access token, refreshing if necessary.
+ * This is the main entry point for all Sheets API calls.
+ */
+export async function getAccessToken(): Promise<string> {
+  if (cachedToken && Date.now() < tokenExpiresAt) {
+    return cachedToken;
+  }
+
+  const { email, privateKeyPem } = getServiceAccountConfig();
+  const jwt = await createSignedJwt(email, privateKeyPem);
+  return exchangeJwtForToken(jwt);
 }
 
-export function getAccessToken(): string | null {
-  return currentToken;
+/**
+ * Checks whether the service account credentials are configured.
+ * Does NOT validate them — call getAccessToken() for that.
+ */
+export function isConfigured(): boolean {
+  try {
+    getServiceAccountConfig();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Returns the service account email (for sharing sheets).
+ */
+export function getServiceAccountEmail(): string | null {
+  try {
+    return getServiceAccountConfig().email;
+  } catch {
+    return null;
+  }
+}
+
+/** Force-clear the cached token. */
+export function clearToken(): void {
+  cachedToken = null;
+  tokenExpiresAt = 0;
 }
 
 export function isAuthenticated(): boolean {
-  return currentToken !== null;
+  return cachedToken !== null && Date.now() < tokenExpiresAt;
 }

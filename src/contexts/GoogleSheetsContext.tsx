@@ -5,13 +5,10 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type { GoogleAuthState } from "@/features/sync/googleAuth";
 import {
-  initGoogleAuth,
-  signIn,
-  signOut,
-  getAccessToken,
-  isAuthenticated as checkAuth,
+  isConfigured,
+  isAuthenticated,
+  getServiceAccountEmail,
 } from "@/features/sync/googleAuth";
 import {
   createSpreadsheetStructure,
@@ -22,25 +19,36 @@ import { toast } from "sonner";
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 
 interface GoogleSheetsState {
-  auth: GoogleAuthState;
+  /** Whether SA credentials are present in env vars */
+  configured: boolean;
+  /** SA email for sharing sheets */
+  serviceAccountEmail: string | null;
   spreadsheetId: string | null;
   syncStatus: SyncStatus;
   syncError: string | null;
 }
 
 type GoogleSheetsAction =
-  | { type: "CONNECT_START" }
-  | { type: "CONNECT_SUCCESS" }
-  | { type: "CONNECT_ERROR"; payload: string }
-  | { type: "DISCONNECT" }
   | { type: "SET_SPREADSHEET"; payload: string }
+  | { type: "CLEAR_SPREADSHEET" }
   | { type: "SYNC_START" }
   | { type: "SYNC_SUCCESS" }
   | { type: "SYNC_ERROR"; payload: string };
 
+const SPREADSHEET_KEY = "app:google-sheets-id";
+
+function loadSpreadsheetId(): string | null {
+  try {
+    return localStorage.getItem(SPREADSHEET_KEY);
+  } catch {
+    return null;
+  }
+}
+
 const initialState: GoogleSheetsState = {
-  auth: { isAuthenticated: false, isLoading: false, error: null },
-  spreadsheetId: null,
+  configured: isConfigured(),
+  serviceAccountEmail: getServiceAccountEmail(),
+  spreadsheetId: loadSpreadsheetId(),
   syncStatus: "idle",
   syncError: null,
 };
@@ -50,34 +58,15 @@ function reducer(
   action: GoogleSheetsAction,
 ): GoogleSheetsState {
   switch (action.type) {
-    case "CONNECT_START":
+    case "SET_SPREADSHEET":
+      return { ...state, spreadsheetId: action.payload, syncStatus: "idle" };
+    case "CLEAR_SPREADSHEET":
       return {
         ...state,
-        auth: { isAuthenticated: false, isLoading: true, error: null },
-      };
-    case "CONNECT_SUCCESS":
-      return {
-        ...state,
-        auth: { isAuthenticated: true, isLoading: false, error: null },
-      };
-    case "CONNECT_ERROR":
-      return {
-        ...state,
-        auth: {
-          isAuthenticated: false,
-          isLoading: false,
-          error: action.payload,
-        },
-      };
-    case "DISCONNECT":
-      return {
-        ...state,
-        auth: { isAuthenticated: false, isLoading: false, error: null },
+        spreadsheetId: null,
         syncStatus: "idle",
         syncError: null,
       };
-    case "SET_SPREADSHEET":
-      return { ...state, spreadsheetId: action.payload };
     case "SYNC_START":
       return { ...state, syncStatus: "syncing", syncError: null };
     case "SYNC_SUCCESS":
@@ -95,9 +84,8 @@ function reducer(
 
 interface GoogleSheetsContextValue {
   state: GoogleSheetsState;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
   setSpreadsheet: (urlOrId: string) => Promise<void>;
+  clearSpreadsheet: () => void;
   dispatchSync: React.Dispatch<GoogleSheetsAction>;
 }
 
@@ -108,31 +96,6 @@ const GoogleSheetsContext = createContext<GoogleSheetsContextValue | null>(
 export function GoogleSheetsProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const connect = useCallback(async () => {
-    dispatch({ type: "CONNECT_START" });
-    try {
-      await initGoogleAuth();
-      await signIn();
-      dispatch({ type: "CONNECT_SUCCESS" });
-      toast.success("Connecté à Google Sheets");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erreur de connexion à Google.";
-      dispatch({ type: "CONNECT_ERROR", payload: message });
-      toast.error(message);
-    }
-  }, []);
-
-  const disconnect = useCallback(async () => {
-    try {
-      await signOut();
-      dispatch({ type: "DISCONNECT" });
-      toast.info("Déconnecté de Google Sheets");
-    } catch {
-      toast.error("Erreur lors de la déconnexion.");
-    }
-  }, []);
-
   const setSpreadsheet = useCallback(async (urlOrId: string) => {
     const id = parseSpreadsheetId(urlOrId);
     if (!id) {
@@ -140,15 +103,10 @@ export function GoogleSheetsProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const token = getAccessToken();
-    if (!token) {
-      toast.error("Connectez-vous d'abord à Google.");
-      return;
-    }
-
     try {
       dispatch({ type: "SYNC_START" });
-      await createSpreadsheetStructure(token, id);
+      await createSpreadsheetStructure(id);
+      localStorage.setItem(SPREADSHEET_KEY, id);
       dispatch({ type: "SET_SPREADSHEET", payload: id });
       dispatch({ type: "SYNC_SUCCESS" });
       toast.success("Feuille Google Sheets configurée avec succès.");
@@ -162,13 +120,18 @@ export function GoogleSheetsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const clearSpreadsheet = useCallback(() => {
+    localStorage.removeItem(SPREADSHEET_KEY);
+    dispatch({ type: "CLEAR_SPREADSHEET" });
+    toast.info("Synchronisation Google Sheets désactivée.");
+  }, []);
+
   return (
     <GoogleSheetsContext.Provider
       value={{
         state,
-        connect,
-        disconnect,
         setSpreadsheet,
+        clearSpreadsheet,
         dispatchSync: dispatch,
       }}
     >
@@ -187,7 +150,5 @@ export function useGoogleSheets(): GoogleSheetsContextValue {
   return context;
 }
 
-/**
- * Convenience: returns current auth check without context (for sync services).
- */
-export { checkAuth as isGoogleAuthenticated, getAccessToken };
+/** Re-export for sync services that need auth check. */
+export { isAuthenticated as isGoogleAuthenticated };

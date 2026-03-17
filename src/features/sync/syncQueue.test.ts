@@ -114,14 +114,13 @@ describe("syncQueue", () => {
         analysis: fakeAnalysis,
       });
 
-      const result = await processQueue("fake-token", "fake-spreadsheet-id");
+      const result = await processQueue("fake-spreadsheet-id");
 
       expect(result.processed).toBe(1);
       expect(result.failed).toBe(0);
       expect(result.remaining).toBe(0);
       expect(getQueueSize()).toBe(0);
       expect(mockSyncAnalysis).toHaveBeenCalledWith(
-        "fake-token",
         "fake-spreadsheet-id",
         fakeAnalysis,
       );
@@ -136,7 +135,7 @@ describe("syncQueue", () => {
         analysis: fakeAnalysis,
       });
 
-      const result = await processQueue("fake-token", "fake-spreadsheet-id");
+      const result = await processQueue("fake-spreadsheet-id");
 
       expect(result.processed).toBe(0);
       expect(result.failed).toBe(1);
@@ -162,14 +161,14 @@ describe("syncQueue", () => {
       queue[0].retries = 5; // MAX_RETRIES
       localStorage.setItem("app:sync:queue", JSON.stringify(queue));
 
-      const result = await processQueue("fake-token", "fake-spreadsheet-id");
+      const result = await processQueue("fake-spreadsheet-id");
 
       expect(result.failed).toBe(1);
       expect(result.remaining).toBe(0); // Dropped, not retried
     });
 
     it("returns zero counts for empty queue", async () => {
-      const result = await processQueue("fake-token", "fake-spreadsheet-id");
+      const result = await processQueue("fake-spreadsheet-id");
 
       expect(result.processed).toBe(0);
       expect(result.failed).toBe(0);

@@ -1,6 +1,7 @@
-// Google Sheets API v4 service — uses fetch, no gapi dependency
+// Google Sheets API v4 service — uses service account auth
 
 import type { Analysis } from "@/types/analysis.schema";
+import { getAccessToken } from "./googleAuth";
 import {
   getHeaderRow,
   analysisToSheetRow,
@@ -47,9 +48,10 @@ async function sheetsRequest<T>(
  * Safe to call multiple times — checks existing tabs first.
  */
 export async function createSpreadsheetStructure(
-  token: string,
   spreadsheetId: string,
 ): Promise<void> {
+  const token = await getAccessToken();
+
   // Get existing sheets
   const metadata = await sheetsRequest<{
     sheets: Array<{ properties: { title: string } }>;
@@ -102,10 +104,11 @@ export async function createSpreadsheetStructure(
  * Writes or updates a single analysis row in the Analyses sheet.
  */
 export async function syncAnalysis(
-  token: string,
   spreadsheetId: string,
   analysis: Analysis,
 ): Promise<void> {
+  const token = await getAccessToken();
+
   // Find existing row by ID
   const existingData = await sheetsRequest<{
     values?: string[][];
@@ -158,9 +161,10 @@ export async function syncAnalysis(
  * Reads all analyses from the Analyses sheet.
  */
 export async function fetchAnalyses(
-  token: string,
   spreadsheetId: string,
 ): Promise<Analysis[]> {
+  const token = await getAccessToken();
+
   const data = await sheetsRequest<{
     values?: string[][];
   }>(`${SHEETS_API}/${spreadsheetId}/values/Analyses!A2:AY`, token);

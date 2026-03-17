@@ -63,7 +63,6 @@ export interface ProcessQueueResult {
 }
 
 export async function processQueue(
-  token: string,
   spreadsheetId: string,
 ): Promise<ProcessQueueResult> {
   const queue = getQueue();
@@ -80,7 +79,7 @@ export async function processQueue(
   for (const op of batch) {
     try {
       if (op.type === "upsert" && op.analysis) {
-        await syncAnalysis(token, spreadsheetId, op.analysis);
+        await syncAnalysis(spreadsheetId, op.analysis);
       }
       // "delete" operations are not supported in Google Sheets easily
       // so we just remove from queue (row stays in sheet)
