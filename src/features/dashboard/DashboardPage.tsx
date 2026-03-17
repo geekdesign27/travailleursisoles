@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/select";
 import { ZoneBadge } from "@/components/shared/ZoneBadge";
 import {
+  RiskHeatmap,
+  type HeatmapAnalysis,
+} from "@/components/shared/RiskHeatmap";
+import {
   listAnalyses,
   loadAnalysis,
 } from "@/features/persistence/localStorageService";
@@ -20,7 +24,11 @@ import { useAnalysisResume } from "@/features/persistence/useAnalysisResume";
 import { useAnalysis } from "@/contexts/AnalysisContext";
 import { useSheetAnalyses } from "@/features/sync/useSheetAnalyses";
 import { useGoogleSheets } from "@/contexts/GoogleSheetsContext";
-import type { ZoneRisque } from "@/constants/suvaMatrix";
+import type {
+  ZoneRisque,
+  GravityLevel,
+  ProbabilityLevel,
+} from "@/constants/suvaMatrix";
 import {
   type AnalysisWithZone,
   type DashboardFilters,
@@ -135,6 +143,23 @@ export function DashboardPage() {
   const paginated = useMemo(
     () => paginateAnalyses(sorted, page),
     [sorted, page],
+  );
+
+  // Heatmap data: only analyses with gravity+probability (level 2 completed)
+  const heatmapData = useMemo<HeatmapAnalysis[]>(
+    () =>
+      allAnalyses
+        .filter((a) => a._zone != null && a.level2Result)
+        .map((a) => ({
+          id: a.id,
+          titre_activite: a.titre_activite,
+          entreprise: a.entreprise,
+          status: a.status,
+          gravity: a.level2Result!.gravity as GravityLevel,
+          probability: a.level2Result!.probability as ProbabilityLevel,
+          zone: a._zone as ZoneRisque,
+        })),
+    [allAnalyses],
   );
 
   const overdueCount = useMemo(
@@ -278,6 +303,19 @@ export function DashboardPage() {
               ? "1 analyse nécessite une révision"
               : `${overdueCount} analyses nécessitent une révision`}
           </p>
+        </div>
+      )}
+
+      {/* Risk heatmap */}
+      {heatmapData.length > 0 && (
+        <div className="mb-8">
+          <RiskHeatmap
+            analyses={heatmapData}
+            onAnalysisClick={(id) => {
+              const a = allAnalyses.find((x) => x.id === id);
+              if (a) handleCardClick(a);
+            }}
+          />
         </div>
       )}
 
