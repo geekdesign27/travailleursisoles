@@ -133,7 +133,7 @@ describe("sheetsMapper", () => {
             intellectuelle: false,
           },
           dangerDescription:
-            "Description de danger suffisamment longue pour atteindre le minimum de 150 caractères requis par le schéma de validation. On ajoute du texte supplémentaire pour être sûr.",
+            "Chute de hauteur depuis passerelle",
           dangerCategory: "chute",
         },
       });

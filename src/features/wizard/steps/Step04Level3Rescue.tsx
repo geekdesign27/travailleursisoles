@@ -33,18 +33,29 @@ const COUVERTURE_LABELS: Record<CouvertureReseauType, string> = {
 interface NumberFieldProps {
   id: string;
   label: string;
+  description?: string;
   value: number | "";
   onChange: (val: number | "") => void;
   error?: string;
 }
 
-function NumberField({ id, label, value, onChange, error }: NumberFieldProps) {
+function NumberField({
+  id,
+  label,
+  description,
+  value,
+  onChange,
+  error,
+}: NumberFieldProps) {
   const [touched, setTouched] = useState(false);
   const showError = touched && error;
 
   return (
     <div className="space-y-1">
       <Label htmlFor={id}>{label}</Label>
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
       <input
         id={id}
         type="number"
@@ -82,16 +93,13 @@ export function Step04Level3Rescue() {
   >("");
   const [equipementDATI, setEquipementDATI] = useState("");
   const [centraleAlarme, setCentraleAlarme] = useState<boolean | null>(null);
-  const [delaiSecouristesJour, setDelaiSecouristesJour] = useState<number | "">(
-    "",
-  );
-  const [delaiSecouristesNuit, setDelaiSecouristesNuit] = useState<number | "">(
-    "",
-  );
-  const [delaiSecoursPublics, setDelaiSecoursPublics] = useState<number | "">(
-    "",
-  );
-  const [delaiTypeBlessure, setDelaiTypeBlessure] = useState<number | "">("");
+  const [delaiSecouristesJour, setDelaiSecouristesJour] = useState<
+    number | ""
+  >("");
+  const [delaiSecouristesNuit, setDelaiSecouristesNuit] = useState<
+    number | ""
+  >("");
+  const [delaiAmbulance, setDelaiAmbulance] = useState<number | "">("");
   const [tempsSauvetage, setTempsSauvetage] = useState<number | "">("");
 
   // Load analysis from localStorage if not in context
@@ -107,8 +115,9 @@ export function Step04Level3Rescue() {
     }
   }, [state.current, id, dispatch, navigate]);
 
-  // Current zone from level 2 result
+  // Current zone and gravity from level 2 result
   const currentZone = state.current?.level2Result?.zone;
+  const currentGravity = state.current?.level2Result?.gravity;
 
   // Validate number fields
   function validateNumber(val: number | ""): string | undefined {
@@ -117,48 +126,61 @@ export function Step04Level3Rescue() {
     return undefined;
   }
 
-  // Compute tmax when all number fields are filled
+  // Compute tmax when all required fields are filled
   const tmaxResult = useMemo(() => {
     if (
-      typeof delaiTypeBlessure !== "number" ||
       typeof delaiSecouristesJour !== "number" ||
-      typeof delaiSecoursPublics !== "number" ||
-      typeof tempsSauvetage !== "number"
+      typeof delaiAmbulance !== "number" ||
+      typeof tempsSauvetage !== "number" ||
+      !currentZone ||
+      !currentGravity
     ) {
       return null;
     }
 
     return calculateTmax({
-      delaiTypeBlessure,
       tempsSecouristes: delaiSecouristesJour,
-      tempsAmbulance: delaiSecoursPublics,
+      tempsAmbulance: delaiAmbulance,
       tempsSauvetage,
+      zone: currentZone,
+      gravite: currentGravity,
     });
   }, [
-    delaiTypeBlessure,
     delaiSecouristesJour,
-    delaiSecoursPublics,
+    delaiAmbulance,
     tempsSauvetage,
+    currentZone,
+    currentGravity,
   ]);
 
   // Level 3 decision
   const level3Decision = useMemo(() => {
     if (!tmaxResult || !currentZone) return null;
-    return evaluateLevel3(tmaxResult.tmax, currentZone);
-  }, [tmaxResult, currentZone]);
+    return evaluateLevel3(
+      tmaxResult.tmax,
+      currentZone,
+      currentGravity,
+      typeof delaiSecouristesJour === "number"
+        ? delaiSecouristesJour
+        : undefined,
+      typeof tempsSauvetage === "number" ? tempsSauvetage : undefined,
+    );
+  }, [
+    tmaxResult,
+    currentZone,
+    currentGravity,
+    delaiSecouristesJour,
+    tempsSauvetage,
+  ]);
 
-  // Form completeness check
+  // Form completeness — the button "Suivant" should NEVER be blocked by a negative t_max
   const isFormComplete =
     couvertureReseau !== "" &&
     centraleAlarme !== null &&
     typeof delaiSecouristesJour === "number" &&
     delaiSecouristesJour >= 0 &&
-    typeof delaiSecouristesNuit === "number" &&
-    delaiSecouristesNuit >= 0 &&
-    typeof delaiSecoursPublics === "number" &&
-    delaiSecoursPublics >= 0 &&
-    typeof delaiTypeBlessure === "number" &&
-    delaiTypeBlessure >= 0 &&
+    typeof delaiAmbulance === "number" &&
+    delaiAmbulance >= 0 &&
     typeof tempsSauvetage === "number" &&
     tempsSauvetage >= 0;
 
@@ -167,17 +189,19 @@ export function Step04Level3Rescue() {
   }, [navigate, id]);
 
   const handleNext = useCallback(() => {
-    if (!state.current || !tmaxResult || !level3Decision || !isFormComplete)
-      return;
+    if (!state.current || !isFormComplete) return;
 
-    const finalTmaxResult = {
-      tmax: tmaxResult.tmax,
-      feasible: tmaxResult.feasible,
-      reclassificationNeeded: level3Decision.reclassificationNeeded,
-      ...(level3Decision.newZone !== undefined
-        ? { newZone: level3Decision.newZone }
-        : {}),
-    };
+    const finalTmaxResult = tmaxResult
+      ? {
+          tmax: tmaxResult.tmax,
+          feasible: tmaxResult.feasible,
+          reclassificationNeeded:
+            level3Decision?.reclassificationNeeded ?? false,
+          ...(level3Decision?.newZone !== undefined
+            ? { newZone: level3Decision.newZone }
+            : {}),
+        }
+      : { tmax: 0, feasible: false, reclassificationNeeded: false };
 
     const updated = {
       ...state.current,
@@ -189,9 +213,11 @@ export function Step04Level3Rescue() {
           equipementDATI,
           centraleAlarme: centraleAlarme as boolean,
           delaiSecouristesJour: delaiSecouristesJour as number,
-          delaiSecouristesNuit: delaiSecouristesNuit as number,
-          delaiSecoursPublics: delaiSecoursPublics as number,
-          delaiTypeBlessure: delaiTypeBlessure as number,
+          delaiSecouristesNuit:
+            typeof delaiSecouristesNuit === "number"
+              ? delaiSecouristesNuit
+              : 0,
+          delaiAmbulance: delaiAmbulance as number,
           tempsSauvetage: tempsSauvetage as number,
         },
         tmaxResult: finalTmaxResult,
@@ -212,7 +238,7 @@ export function Step04Level3Rescue() {
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    if (level3Decision.nextAction === "report") {
+    if (level3Decision?.nextAction === "report") {
       navigate(`/analysis/${id}/report`);
     } else {
       navigate(`/analysis/${id}/level-4`);
@@ -227,8 +253,7 @@ export function Step04Level3Rescue() {
     centraleAlarme,
     delaiSecouristesJour,
     delaiSecouristesNuit,
-    delaiSecoursPublics,
-    delaiTypeBlessure,
+    delaiAmbulance,
     tempsSauvetage,
     id,
     navigate,
@@ -339,54 +364,55 @@ export function Step04Level3Rescue() {
         {/* Section B: Rescue delays */}
         <fieldset className="space-y-4">
           <legend className="mb-1 flex items-center gap-2 text-base font-medium">
-            Délais de secours (en minutes)
+            Délais de la chaîne de secours (en minutes)
             <HelpTooltip
               {...HELP_CONTENT.delai_secouristes}
               fieldId="delai_secouristes"
             />
           </legend>
           <p className="text-sm text-muted-foreground">
-            Indiquez les délais estimés pour chaque étape de la chaîne de
+            Indiquez le temps estimé pour chaque maillon de la chaîne de
             secours.
           </p>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <NumberField
               id="delai-secouristes-jour"
-              label="Délai secouristes jour (min)"
+              label="Secouriste interne — jour (min)"
+              description="Temps pour qu'un collègue formé aux premiers secours arrive sur place"
               value={delaiSecouristesJour}
               onChange={setDelaiSecouristesJour}
               error={validateNumber(delaiSecouristesJour)}
             />
             <NumberField
               id="delai-secouristes-nuit"
-              label="Délai secouristes nuit (min)"
+              label="Secouriste interne — nuit/weekend (min)"
+              description="Idem de nuit ou le weekend (souvent plus long, moins de personnel)"
               value={delaiSecouristesNuit}
               onChange={setDelaiSecouristesNuit}
-              error={validateNumber(delaiSecouristesNuit)}
             />
             <NumberField
-              id="delai-secours-publics"
-              label="Délai secours publics (min)"
-              value={delaiSecoursPublics}
-              onChange={setDelaiSecoursPublics}
-              error={validateNumber(delaiSecoursPublics)}
-            />
-            <NumberField
-              id="delai-type-blessure"
-              label="Délai type blessure (min)"
-              value={delaiTypeBlessure}
-              onChange={setDelaiTypeBlessure}
-              error={validateNumber(delaiTypeBlessure)}
+              id="delai-ambulance"
+              label="Ambulance / secours publics 144 / REGA (min)"
+              description="Temps pour que les secours professionnels arrivent sur le lieu de travail"
+              value={delaiAmbulance}
+              onChange={setDelaiAmbulance}
+              error={validateNumber(delaiAmbulance)}
             />
             <NumberField
               id="temps-sauvetage"
-              label="Temps sauvetage estimé (min)"
+              label="Accès au blessé / sauvetage technique (min)"
+              description="Temps supplémentaire lié aux obstacles d'accès (hauteur, espace confiné...). 0 si accès direct."
               value={tempsSauvetage}
               onChange={setTempsSauvetage}
               error={validateNumber(tempsSauvetage)}
             />
           </div>
+
+          <p className="text-xs text-muted-foreground italic">
+            En cas de doute sur le délai ambulance, appelez le 144 avec
+            l'adresse exacte du site pour obtenir une estimation.
+          </p>
         </fieldset>
 
         {/* Section C: t_max calculation display */}
@@ -398,67 +424,69 @@ export function Step04Level3Rescue() {
 
             <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
               <p className="text-sm font-mono text-muted-foreground">
-                t_max = {delaiTypeBlessure as number} -{" "}
-                {delaiSecouristesJour as number} -{" "}
-                {delaiSecoursPublics as number} - {tempsSauvetage as number}
+                t_max = {tmaxResult.base} (base{" "}
+                {currentZone === "3a" ? "Zone 3a" : "Zone 3b"}) −{" "}
+                {delaiSecouristesJour as number} (secouriste) −{" "}
+                {delaiAmbulance as number} (ambulance) −{" "}
+                {tempsSauvetage as number} (sauvetage)
               </p>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium">Résultat :</span>
                 <span
                   className={cn(
                     "rounded-md px-3 py-1 text-lg font-bold",
-                    tmaxResult.tmax > 0
+                    tmaxResult.tmax > 30
                       ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                      : tmaxResult.tmax > 0
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
                   )}
                 >
                   t_max = {tmaxResult.tmax} min
                 </span>
               </div>
+              {tmaxResult.tmax > 30 && (
+                <p className="text-xs text-muted-foreground">
+                  Intervalle de surveillance recommandé :{" "}
+                  {tmaxResult.intervalle} min (t_max − 15 min de marge)
+                </p>
+              )}
             </div>
 
             {/* Gate alerts based on t_max result */}
-            {tmaxResult.tmax > 0 && (
+            {level3Decision && level3Decision.feasible && (
               <GateAlert
                 type="info"
                 title="Sauvetage réalisable"
-                message={`Le temps disponible (${tmaxResult.tmax} min) est suffisant pour organiser le sauvetage. Passez au niveau 4 pour définir les mesures de surveillance.`}
+                message={`Le temps disponible (${tmaxResult.tmax} min) est suffisant. Intervalle de surveillance recommandé : ${tmaxResult.intervalle} min. Passez au niveau 4.`}
               />
             )}
 
-            {tmaxResult.tmax <= 0 &&
-              currentZone &&
-              (currentZone === "3a" || currentZone === "3b") && (
-                <GateAlert
-                  type="warning"
-                  title="Sauvetage non réalisable — Reclassification"
-                  message={`Le temps disponible est insuffisant (${tmaxResult.tmax} min). Selon la règle R4, la zone est reclassifiée de ${String(currentZone).toUpperCase()} vers Zone 2. Des mesures renforcées sont nécessaires.`}
-                  reference="SUVA 44094.F, règle R4"
-                  zone={2}
-                />
-              )}
-
-            {tmaxResult.tmax <= 0 && currentZone === 2 && (
+            {level3Decision && !level3Decision.feasible && (
               <GateAlert
                 type="warning"
-                title="Sauvetage non réalisable — Zone 2 confirmée"
-                message={`Le temps disponible est insuffisant (${tmaxResult.tmax} min). La classification Zone 2 est confirmée. Des mesures renforcées sont nécessaires.`}
-                zone={2}
+                title={
+                  level3Decision.reclassificationNeeded
+                    ? "Sauvetage non réalisable — Reclassification"
+                    : "Sauvetage non réalisable"
+                }
+                message={
+                  level3Decision.message ??
+                  `Le temps disponible est insuffisant (${tmaxResult.tmax} min).`
+                }
+                reference="SUVA 44094.F ch. 7.3"
+                zone={level3Decision.newZone}
               />
             )}
           </div>
         )}
 
-        {/* Navigation */}
+        {/* Navigation — NEVER blocked by negative t_max */}
         <WizardNavigation
           onNext={handleNext}
           onPrevious={handlePrevious}
-          nextDisabled={!isFormComplete || !tmaxResult}
-          nextLabel={
-            level3Decision?.nextAction === "report"
-              ? "Voir le rapport"
-              : "Suivant"
-          }
+          nextDisabled={!isFormComplete}
+          nextLabel="Suivant"
         />
       </CardContent>
     </Card>

@@ -44,8 +44,7 @@ export interface TechnicalSummary {
     centraleAlarme: boolean;
     delaiSecouristesJour: number;
     delaiSecouristesNuit: number;
-    delaiSecoursPublics: number;
-    delaiTypeBlessure: number;
+    delaiAmbulance: number;
     tempsSauvetage: number;
   } | null;
 }

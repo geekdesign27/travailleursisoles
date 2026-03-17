@@ -87,8 +87,8 @@ export const Level2ResultSchema = z.object({
   aptitudes: AptitudesSchema,
   dangerDescription: z
     .string()
-    .min(150, "Minimum 150 caractères")
-    .max(300, "Maximum 300 caractères"),
+    .max(300, "Maximum 300 caractères")
+    .default(""),
   dangerCategory: DangerCategory,
 });
 
@@ -110,8 +110,7 @@ export const OperationalConditionsSchema = z.object({
   centraleAlarme: z.boolean(),
   delaiSecouristesJour: z.number().min(0, "La valeur doit être >= 0"),
   delaiSecouristesNuit: z.number().min(0, "La valeur doit être >= 0"),
-  delaiSecoursPublics: z.number().min(0, "La valeur doit être >= 0"),
-  delaiTypeBlessure: z.number().min(0, "La valeur doit être >= 0"),
+  delaiAmbulance: z.number().min(0, "La valeur doit être >= 0"),
   tempsSauvetage: z.number().min(0, "La valeur doit être >= 0"),
 });
 

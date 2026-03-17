@@ -126,8 +126,7 @@ function buildCsvContent(analysis: Analysis): string {
     lines.push(
       row("Délai secouristes (nuit)", `${oc.delaiSecouristesNuit} min`),
     );
-    lines.push(row("Délai secours publics", `${oc.delaiSecoursPublics} min`));
-    lines.push(row("Délai type blessure", `${oc.delaiTypeBlessure} min`));
+    lines.push(row("Ambulance / secours publics (144 / REGA)", `${oc.delaiAmbulance} min`));
     lines.push(row("Temps sauvetage", `${oc.tempsSauvetage} min`));
 
     const tm = analysis.level3Result.tmaxResult;
