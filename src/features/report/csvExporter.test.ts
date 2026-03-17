@@ -64,7 +64,7 @@ describe("buildCsvContent", () => {
           probability: "C",
           zone: "3b",
           aptitudes: { psychique: true, physique: true, intellectuelle: true },
-          dangerDescription: "a".repeat(150),
+          dangerDescription: "Chute de hauteur",
           dangerCategory: "chimique",
         },
       }),
@@ -83,7 +83,7 @@ describe("buildCsvContent", () => {
           probability: "C",
           zone: "3b",
           aptitudes: { psychique: true, physique: true, intellectuelle: true },
-          dangerDescription: "a".repeat(150),
+          dangerDescription: "Chute de hauteur",
           dangerCategory: "chimique",
         },
         level3Result: {
@@ -93,8 +93,7 @@ describe("buildCsvContent", () => {
             centraleAlarme: true,
             delaiSecouristesJour: 5,
             delaiSecouristesNuit: 10,
-            delaiSecoursPublics: 12,
-            delaiTypeBlessure: 60,
+            delaiAmbulance: 12,
             tempsSauvetage: 15,
           },
           tmaxResult: {
@@ -119,7 +118,7 @@ describe("buildCsvContent", () => {
           probability: "B",
           zone: 4,
           aptitudes: { psychique: true, physique: true, intellectuelle: true },
-          dangerDescription: "a".repeat(150),
+          dangerDescription: "Chute de hauteur",
           dangerCategory: "autre",
         },
         level4Result: {

@@ -116,25 +116,20 @@ export const HELP_CONTENT: Record<string, HelpItem> = {
       "Qualité de la couverture téléphonique ou radio sur le lieu de travail. Détermine la fiabilité des communications d'urgence.",
   },
   delai_secouristes: {
-    title: "Délai secouristes",
+    title: "Délais de la chaîne de secours",
     content:
-      "Temps nécessaire pour que les secouristes internes arrivent sur le lieu de l'incident.",
-    reference: "SUVA 44094.F ch. 4.2",
+      "Temps nécessaire pour chaque maillon de la chaîne : secouriste interne (collègue formé aux premiers secours), ambulance/REGA (secours professionnels), et accès au blessé (obstacles éventuels).",
+    reference: "SUVA 44094.F ch. 7",
   },
   delai_secours_publics: {
-    title: "Délai secours publics",
+    title: "Ambulance / secours publics (144 / REGA)",
     content:
-      "Temps d'intervention des services de secours externes (ambulance, pompiers, Rega).",
-  },
-  delai_type_blessure: {
-    title: "Délai type blessure",
-    content:
-      "Temps maximal tolérable avant intervention selon le type de blessure possible (ex. : arrêt cardiaque = 4 min).",
+      "Temps estimé pour que les secours professionnels (ambulanciers via le 144, ou REGA en zone isolée) arrivent sur le lieu de travail. En cas de doute, appelez le 144 avec l'adresse exacte.",
   },
   temps_sauvetage: {
-    title: "Temps de sauvetage",
+    title: "Accès au blessé / sauvetage technique",
     content:
-      "Durée estimée de l'opération de sauvetage elle-même (extraction, mise en sécurité).",
+      "Temps supplémentaire lié aux obstacles d'accès au blessé (hauteur, espace confiné, sous-sol, besoin de treuil). Mettre 0 si accès direct sans obstacle.",
   },
   equipement_dati: {
     title: "Équipement DATI",

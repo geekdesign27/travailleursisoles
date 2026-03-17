@@ -130,15 +130,11 @@ export function TechnicalView({ analysis }: TechnicalViewProps) {
                 value={`${summary.operationalConditions.delaiSecouristesNuit} min`}
               />
               <DataRow
-                label="Délai secours publics"
-                value={`${summary.operationalConditions.delaiSecoursPublics} min`}
+                label="Ambulance / secours publics (144 / REGA)"
+                value={`${summary.operationalConditions.delaiAmbulance} min`}
               />
               <DataRow
-                label="Délai type blessure"
-                value={`${summary.operationalConditions.delaiTypeBlessure} min`}
-              />
-              <DataRow
-                label="Temps sauvetage"
+                label="Accès au blessé / sauvetage technique"
                 value={`${summary.operationalConditions.tempsSauvetage} min`}
               />
             </div>

@@ -88,8 +88,6 @@ export function Step03Level2Risk() {
     aptitudeResult.allValid &&
     gravity !== null &&
     probability !== null &&
-    dangerDescription.length >= 150 &&
-    dangerDescription.length <= 300 &&
     dangerCategory !== "";
 
   const isBlocked =
@@ -388,12 +386,6 @@ export function Step03Level2Risk() {
               />
               <p className="text-xs text-muted-foreground">
                 {dangerDescription.length}/300 caractères
-                {dangerDescription.length > 0 &&
-                  dangerDescription.length < 150 && (
-                    <span className="ml-2 text-suva-error">
-                      (minimum 150 caractères)
-                    </span>
-                  )}
               </p>
             </div>
 

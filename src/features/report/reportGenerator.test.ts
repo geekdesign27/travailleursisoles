@@ -37,7 +37,7 @@ describe("getManagementDecision", () => {
         probability: "E",
         zone: 1,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
     });
@@ -51,7 +51,7 @@ describe("getManagementDecision", () => {
         probability: "D",
         zone: 2,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "chute",
       },
     });
@@ -67,7 +67,7 @@ describe("getManagementDecision", () => {
         probability: "D",
         zone: "3a",
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "chimique",
       },
     });
@@ -83,7 +83,7 @@ describe("getManagementDecision", () => {
         probability: "A",
         zone: 4,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "autre",
       },
     });
@@ -102,7 +102,7 @@ describe("getManagementDecision", () => {
         probability: "D",
         zone: "3a",
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
       level3Result: {
@@ -112,8 +112,7 @@ describe("getManagementDecision", () => {
           centraleAlarme: false,
           delaiSecouristesJour: 10,
           delaiSecouristesNuit: 20,
-          delaiSecoursPublics: 15,
-          delaiTypeBlessure: 5,
+          delaiAmbulance: 15,
           tempsSauvetage: 10,
         },
         tmaxResult: {
@@ -139,7 +138,7 @@ describe("generateManagementActions", () => {
         probability: "E",
         zone: 1,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
     });
@@ -157,7 +156,7 @@ describe("generateManagementActions", () => {
         probability: "A",
         zone: 4,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "autre",
       },
     });
@@ -174,7 +173,7 @@ describe("generateManagementActions", () => {
         probability: "D",
         zone: "3a",
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
       level3Result: {
@@ -184,8 +183,7 @@ describe("generateManagementActions", () => {
           centraleAlarme: false,
           delaiSecouristesJour: 10,
           delaiSecouristesNuit: 20,
-          delaiSecoursPublics: 15,
-          delaiTypeBlessure: 5,
+          delaiAmbulance: 15,
           tempsSauvetage: 10,
         },
         tmaxResult: {
@@ -214,7 +212,7 @@ describe("generateManagementActions", () => {
         probability: "E",
         zone: 1,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
     });
@@ -231,7 +229,7 @@ describe("generateManagementActions", () => {
         probability: "E",
         zone: 1,
         aptitudes: { psychique: false, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
     });
@@ -261,7 +259,7 @@ describe("generateTechnicalSummary", () => {
         probability: "C",
         zone: "3b",
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "chimique",
       },
     });
@@ -282,7 +280,7 @@ describe("generateTechnicalSummary", () => {
         probability: "C",
         zone: "3b",
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "chimique",
       },
       level3Result: {
@@ -292,8 +290,7 @@ describe("generateTechnicalSummary", () => {
           centraleAlarme: true,
           delaiSecouristesJour: 5,
           delaiSecouristesNuit: 10,
-          delaiSecoursPublics: 12,
-          delaiTypeBlessure: 60,
+          delaiAmbulance: 12,
           tempsSauvetage: 15,
         },
         tmaxResult: {
@@ -331,7 +328,7 @@ describe("generateTechnicalSummary", () => {
         probability: "E",
         zone: 1,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
     });
@@ -348,7 +345,7 @@ describe("generateTechnicalSummary", () => {
         probability: "D",
         zone: 2,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "chute",
       },
       level3Result: {
@@ -358,8 +355,7 @@ describe("generateTechnicalSummary", () => {
           centraleAlarme: false,
           delaiSecouristesJour: 20,
           delaiSecouristesNuit: 25,
-          delaiSecoursPublics: 15,
-          delaiTypeBlessure: 60,
+          delaiAmbulance: 15,
           tempsSauvetage: 10,
         },
         tmaxResult: {
@@ -381,7 +377,7 @@ describe("generateTechnicalSummary", () => {
         probability: "B",
         zone: 4,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "autre",
       },
       level4Result: {
@@ -411,7 +407,7 @@ describe("getEffectiveZone", () => {
         probability: "A",
         zone: 4,
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "autre",
       },
     });
@@ -425,7 +421,7 @@ describe("getEffectiveZone", () => {
         probability: "D",
         zone: "3a",
         aptitudes: { psychique: true, physique: true, intellectuelle: true },
-        dangerDescription: "a".repeat(150),
+        dangerDescription: "Chute de hauteur",
         dangerCategory: "mecanique",
       },
       level3Result: {
@@ -435,8 +431,7 @@ describe("getEffectiveZone", () => {
           centraleAlarme: false,
           delaiSecouristesJour: 10,
           delaiSecouristesNuit: 20,
-          delaiSecoursPublics: 15,
-          delaiTypeBlessure: 5,
+          delaiAmbulance: 15,
           tempsSauvetage: 10,
         },
         tmaxResult: {
